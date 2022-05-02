@@ -11,9 +11,6 @@ import GenericMethods from './scripts/GenericMethods.js'
 import FileSystem from './scripts/FileSystem.js'
 import Constants from './data/Constants.js'
 import ObjectOperation from './scripts/ObjectOperation.js'
-import ObjectProp from "./components/v/ObjectProp";
-import ArrayProp from "./components/v/ArrayProp";
-import VarProp from "./components/v/VarProp";
 
 
 //Generic JS constructor
@@ -21,9 +18,7 @@ let constants = new Constants();
 let fileSystem = new FileSystem();
 let genericMethods = new GenericMethods();
 
-
-
-Vue.config.productionTip = false;
+//Vue.config.productionTip = false;
 Vue.use(VueRouter);
 
 //Vue prototype
@@ -32,17 +27,19 @@ Vue.prototype.$constants = constants;
 Vue.prototype.$fileSystem = fileSystem;
 Vue.prototype.$ObjectOperation = new ObjectOperation();
 Vue.prototype.$hovering = "";
+Vue.prototype.$pastebin = { type : null , elemTitle : null ,  elem : null };
 
-// Vue.component('objectProp', require('./components/v/ObjectProp.vue'));
-// Vue.component('arrayProp', require('./components/v/ArrayProp.vue'));
-// Vue.component('varProp', require('./components/v/VarProp.vue'));
+import objectProp from './components/v/ObjectProp.vue';
+import arrayProp from './components/v/ArrayProp.vue';
+import varProp from './components/v/VarProp.vue';
+
+Vue.component('object-prop', objectProp);
+Vue.component('array-prop', arrayProp);
+Vue.component('var-prop', varProp);
 
 
 const routes = [
   { path: '/', name:"Home", component: Home },
-  { path: '/ObjectProp', name:"objectProp", component: ObjectProp },
-  { path: '/ArrayProp', name:"arrayProp", component: ArrayProp },
-  { path: '/VarProp', name:"varProp", component: VarProp }
 ]
 
 const router = new VueRouter({routes});

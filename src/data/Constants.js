@@ -6,6 +6,9 @@ export default class Constant {
     }
 
     //Constant Example
-    EXAMPLE_THIS_IS_A_CONSTANT = "Bonjour Matthieu";
+    ELEM_TYPE_OBJ = "ELEM_TYPE_OBJ";
+    ELEM_TYPE_ARRAY = "ELEM_TYPE_ARRAY";
+    ELEM_TYPE_VAR = "ELEM_TYPE_VAR";
+
 
 }

@@ -1,9 +1,14 @@
 <template>
-  <v-container >
-    <v-app-bar app>
+  <v-app>
+    <v-app-bar app >
       <v-row>
-        <v-col cols="10">
-          <!--          <v-toolbar-title> {{ jsonName === "" ? "json helper" : jsonName }}</v-toolbar-title>-->
+        <v-col cols="8">
+            <h4 style="padding-left: 2em; color: cornflowerblue; max-height: 40px">
+              In the pastebin : {{ $pastebin.elemTitle }}
+            </h4>
+        </v-col>
+        <v-col cols="2">
+          <v-btn color="primary" block @click="clearPasteBin()">Clear pastebin <v-icon>mdi-close</v-icon></v-btn>
         </v-col>
         <v-col cols="2">
           <v-btn color="primary" block @click="loadFile">switchjson</v-btn>
@@ -11,37 +16,42 @@
       </v-row>
     </v-app-bar>
 
-    <v-row class="mt-2">
+    <v-container>
+    <v-row >
       <v-col v-for="(item , index) in jsons" :key="filesPaths[index]" :cols="12/filesPaths.length">
-        <v-app-bar>
+        <v-app-bar style="border-radius: 2em; margin-bottom: 0.2em">
           <v-row>
-            <v-col cols="6" style="overflow: hidden">
-              <h6>
+            <v-col cols="5" style="overflow: hidden" >
+              <h4 style="padding-left: 2em; color: cornflowerblue; max-height: 40px">
                 {{ filesPaths[index] }}
-              </h6>
+              </h4>
             </v-col>
-            <v-col cols="2" >
-              <v-btn color="green" dark block @click="changeColor(index)"><v-icon>mdi-palette</v-icon></v-btn>
+            <v-col cols="1" >
+              <v-btn color="green" dark icon @click="changeColor(index)"><v-icon>mdi-palette</v-icon></v-btn>
             </v-col>
-            <v-col cols="2" >
-              <v-btn color="primary" block @click="saveJson(index)"><v-icon>mdi-content-save</v-icon></v-btn>
+            <v-col cols="1" >
+              <v-btn icon color="primary"  @click="saveJson(index)">
+                <v-icon>mdi-content-save</v-icon>
+              </v-btn>
             </v-col>
-            <v-col cols="2">
-              <v-btn color="red" block @click="closeJson(index)">close</v-btn>
+            <v-col cols="1">
+              <v-btn icon color="red"  @click="closeJson(index)">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
             </v-col>
           </v-row>
         </v-app-bar>
-        <ObjectProp :content="item" :deepness="0" :tittle="filesPaths[index]" :basecolor=" colors[index]"></ObjectProp>
+        <object-prop :content="item" :deepness="0" :tittle="filesPaths[index]" :basecolor=" colors[index]"></object-prop>
       </v-col>
     </v-row>
+    </v-container>
 
-  </v-container>
+  </v-app>
 </template>
 
 <script>
 
-import ObjectProp from "./ObjectProp";
-
+import Vue from "vue";
 const fs = require('fs');
 const electron = require('electron');
 const dialog = electron.remote.dialog;
@@ -49,7 +59,6 @@ const path = require('path');
 
 export default {
   name: 'Home',
-  components: {ObjectProp},
   data: () => {
     return {
       jsons: [],
@@ -89,10 +98,7 @@ export default {
                   (error) => {
                     console.error(error);
                   });
-
             }
-
-
           }
         }).catch(err => {
           console.log(err)
@@ -111,6 +117,11 @@ export default {
     changeColor(index)
     {
       this.colors[index]= Math.floor(Math.random() * 500);
+      this.$forceUpdate();
+    },
+    clearPasteBin()
+    {
+      Vue.prototype.$pastebin =  { type : null , elemTitle : null ,  elem : null };
       this.$forceUpdate();
     }
 

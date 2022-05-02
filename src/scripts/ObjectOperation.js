@@ -144,7 +144,7 @@ export default class ObjectOperation {
             b = (255-b)<255/3 ? (255-b)*3 : 255-b;
         }
 
-        return "rgba("+r+","+g+","+b+",1)";
+        return "rgba("+r+","+g+","+b+",0)";
     }
 
 
