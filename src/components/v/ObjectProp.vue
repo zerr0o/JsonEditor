@@ -22,7 +22,6 @@
         </v-card-title>
       </v-col>
 
-
       <v-col v-if="!isAVar()" cols="2" align="center" >
         <v-btn elevation="0" color="green"  :disabled="$pastebin.type === null" @click="pasteHere()" >
           paste in<v-icon right>mdi-content-paste</v-icon>
