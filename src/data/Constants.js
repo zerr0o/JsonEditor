@@ -9,6 +9,7 @@ export default class Constant {
     ELEM_TYPE_OBJ = "ELEM_TYPE_OBJ";
     ELEM_TYPE_ARRAY = "ELEM_TYPE_ARRAY";
     ELEM_TYPE_VAR = "ELEM_TYPE_VAR";
+    ELEM_TYPE_UNKNOWN = "ELEM_TYPE_UNKNOWN";
 
 
 }

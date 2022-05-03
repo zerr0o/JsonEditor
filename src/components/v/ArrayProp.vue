@@ -1,41 +1,43 @@
 <template>
-  <v-container>
-    <!--    <v-list flat rounded dense color="transparent">-->
-    <!--      <v-list-item-group>-->
-    <!--        <v-list-item  v-for="(item,index) in content" :key="$ObjectOperation.makeId(5)+index.toString()">-->
-    <!--          <v-list-item-content >-->
-    <!--   if it is an object     -->
+  <div style="margin : 0 0 0 2em">
 
-    <div style="padding : 0; border: 3px solid lightsalmon; border-radius: 2em; overflow: hidden"
-         v-for="(item,index) in content" :key="$ObjectOperation.makeId(5)+index.toString()">
-      <div v-if="$ObjectOperation.isAnObject(item)">
-        <object-prop :content="item" :tittle="index" :arrayElem="true" :deepness="deepness+1"
-                     :basecolor="basecolor"></object-prop>
+    <!--   if it is an object     -->
+    <div v-for="(item,index) in content" :key="$ObjectOperation.makeId(5)+index.toString()" style="position: relative">
+
+      <div v-if="!$ObjectOperation.isAVar(item)" style="position: absolute; height: 100%; width: 100%; top:0 ; left: 0;"
+           :class="{'openedDiv' : isOpened[index] }" ></div>
+
+      <div @click="openElem(index)">
+<!--        :style="{'background-color': $ObjectOperation.isAnObject(item)? 'red' : $ObjectOperation.isAnArray(item) ? 'yellow' : 'yellowgreen' }"-->
+        <title-bar
+
+            @click="isOpened[index]=!isOpened[index]"
+            :title="index"
+            :icon="getIconType(item)"
+            :actions="getAction(true , true ,true)"
+            :opened="isOpened[index]"
+            :content="$ObjectOperation.isAVar(item)? item : ''"
+            :arrayElem="true"
+        ></title-bar>
       </div>
-      <!--   if it is an array     -->
-      <div v-if="$ObjectOperation.isAnArray(item)">
-        <code>salut toi</code>
-        <array-prop :content="item" :tittle="index" :arrayElem="true" :deepness="deepness+1"
-                    :basecolor="basecolor"></array-prop>
-      </div>
-      <!--   if it is a var     -->
-      <div v-if="item && !$ObjectOperation.isAnArray(item) && !$ObjectOperation.isAnObject(item)">
-        <var-prop :tittle="tittle" :content="item" :arrayElem="index" :deepness="deepness+1"
-                  :basecolor="basecolor">{{ content }}
-        </var-prop>
-        <!--              <v-spacer v-if="index < content.length-1"-->
-        <!--                        style="border: 1px solid black; margin: 1em 0 1em 0 "></v-spacer>-->
+
+      <div v-if="isOpened[index]">
+        <!--   if it is an object     -->
+        <div v-if="$ObjectOperation.isAnObject(item)">
+          <object-prop v-if="isOpened[index]" :content="item" :tittle="index"
+                       :deepness="deepness+1" :basecolor="basecolor"
+                       :deleteInParent="(x)=>{deleteFromChild(x)}"
+          ></object-prop>
+        </div>
+        <!--   if it is an array     -->
+        <div v-else-if="$ObjectOperation.isAnArray(item)">
+          <array-prop v-if="isOpened[index]" :content="item" :tittle="index" :deepness="deepness+1"
+                      :basecolor="basecolor"></array-prop>
+        </div>
+
       </div>
     </div>
-    <v-btn @click="pasteHere()">paste new input</v-btn>
-
-
-    <!--          </v-list-item-content>-->
-    <!--        </v-list-item>-->
-    <!--      </v-list-item-group>-->
-    <!--    </v-list>-->
-<!--    <v-btn rounded color="primary">+add element</v-btn>-->
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -51,31 +53,48 @@ export default {
   data: () => {
     return {
       mainObject: [],
-      isOpened: false
+      isOpened: []
     }
   },
   created() {
+    for (let i = 0; i < this.content.length; i++) {
+      this.isOpened.push(false);
+    }
   },
   methods: {
 
     makeID() {
       this.$ObjectOperation.makeId(5)
     },
-    test(value)
-    {
+    test(value) {
       console.log(value);
     },
-    copyElem()
-    {
+    copyElem() {
       this.$pastebin.type = this.$constants.ELEM_TYPE_ARRAY;
       this.$pastebin.elemTitle = this.tittle;
       this.$pastebin.elem = this.content;
     },
-    pasteHere()
-    {
+    pasteHere() {
       this.content.push(this.$pastebin.elem);
       console.log(this.content);
       //this.$forceUpdate();
+    },
+    getAction(paste, copy, del) {
+      return this.$ObjectOperation.GetActions(paste, copy, del);
+    },
+    getIconType(elem) {
+      switch (true) {
+        case this.$ObjectOperation.isAnObject(elem):
+          return this.$constants.ELEM_TYPE_OBJ;
+        case this.$ObjectOperation.isAnArray(elem):
+          return this.$constants.ELEM_TYPE_ARRAY;
+        default:
+          return this.$constants.ELEM_TYPE_VAR;
+      }
+    },
+    openElem(index) {
+      this.isOpened[index] = !this.isOpened[index];
+      this.$forceUpdate();
     }
 
 

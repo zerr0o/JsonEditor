@@ -32,10 +32,12 @@ Vue.prototype.$pastebin = { type : null , elemTitle : null ,  elem : null };
 import objectProp from './components/v/ObjectProp.vue';
 import arrayProp from './components/v/ArrayProp.vue';
 import varProp from './components/v/VarProp.vue';
+import titleBar from './components/v/TitleBar.vue';
 
 Vue.component('object-prop', objectProp);
 Vue.component('array-prop', arrayProp);
 Vue.component('var-prop', varProp);
+Vue.component('title-bar', titleBar);
 
 
 const routes = [

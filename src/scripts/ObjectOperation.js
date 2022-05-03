@@ -6,6 +6,8 @@ export default class ObjectOperation {
 
     }
 
+    pastebin = null;
+
     /**
      * Browse through object
      * @param obj
@@ -160,6 +162,35 @@ export default class ObjectOperation {
         t ^= t + Math.imul(t ^ t >>> 7, t | 61);
         return ((t ^ t >>> 14) >>> 0) / 4294967296;
 
+    }
+
+    /**
+     * get button actions
+     * @returns {[{enable: boolean, fAction: fAction},{enable: boolean, fAction: fAction},{enable: boolean, fAction: fAction}]}
+     * @constructor
+     */
+    GetActions( paste , copy , del )
+    {
+        return [
+            {
+                fAction: () => {
+                    this.pasteHere()
+                },
+                enable: paste
+            },
+            {
+                fAction: () => {
+                    this.copyElem()
+                },
+                enable: copy
+            },
+            {
+                fAction: () => {
+                    this.deleteElem()
+                },
+                enable: del
+            }
+        ]
     }
 
 }

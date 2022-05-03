@@ -3,25 +3,25 @@
     <v-col v-if="arrayElem > -1" cols="1" align="center">
       <h4>{{ arrayElem }}</h4>
     </v-col>
-    <v-col cols="1" align="center">
-      <v-icon>{{ getIconAndType(content) }}</v-icon>
-    </v-col>
-    <v-col v-if="tittle" cols="3">
-      <v-card-title>{{ tittle ? tittle : "empty"}}</v-card-title>
-    </v-col>
+<!--    <v-col cols="1" align="center">-->
+<!--      <v-icon>{{ getIconAndType(content) }}</v-icon>-->
+<!--    </v-col>-->
+<!--    <v-col v-if="tittle" cols="3">-->
+<!--      <v-card-title>{{ tittle ? tittle : "empty"}}</v-card-title>-->
+<!--    </v-col>-->
     <v-col :cols="tittle ? 6 : 8">
       <v-list-item-title style="text-align: right ; padding-right: 0.3em">{{ content }}</v-list-item-title>
     </v-col>
-    <v-col cols="1" align="center">
-      <v-btn icon>
-        <v-icon>mdi-content-copy</v-icon>
-      </v-btn>
-    </v-col>
-    <v-col cols="1" align="center">
-      <v-btn icon>
-        <v-icon color="red">mdi-delete</v-icon>
-      </v-btn>
-    </v-col>
+<!--    <v-col cols="1" align="center">-->
+<!--      <v-btn icon>-->
+<!--        <v-icon>mdi-content-copy</v-icon>-->
+<!--      </v-btn>-->
+<!--    </v-col>-->
+<!--    <v-col cols="1" align="center">-->
+<!--      <v-btn icon>-->
+<!--        <v-icon color="red">mdi-delete</v-icon>-->
+<!--      </v-btn>-->
+<!--    </v-col>-->
   </v-row>
 
 </template>

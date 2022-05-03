@@ -19,18 +19,19 @@
     <v-container>
     <v-row >
       <v-col v-for="(item , index) in jsons" :key="filesPaths[index]" :cols="12/filesPaths.length">
-        <v-app-bar style="border-radius: 2em; margin-bottom: 0.2em">
+        <v-card elevation="10" style="border-radius: 2em; margin-bottom: 1.2em">
+          <v-app-bar elevation="0" color="primary" style="overflow: hidden; margin-bottom: 1em">
           <v-row>
-            <v-col cols="5" style="overflow: hidden" >
-              <h4 style="padding-left: 2em; color: cornflowerblue; max-height: 40px">
+            <v-col cols="9" style="overflow: hidden" >
+              <h4 style=" padding-left: 2em; color: white; max-height: 40px ">
                 {{ filesPaths[index] }}
               </h4>
             </v-col>
             <v-col cols="1" >
-              <v-btn color="green" dark icon @click="changeColor(index)"><v-icon>mdi-palette</v-icon></v-btn>
+              <v-btn  dark icon @click="changeColor(index)"><v-icon>mdi-reload</v-icon></v-btn>
             </v-col>
             <v-col cols="1" >
-              <v-btn icon color="primary"  @click="saveJson(index)">
+              <v-btn icon color="success"  @click="saveJson(index)">
                 <v-icon>mdi-content-save</v-icon>
               </v-btn>
             </v-col>
@@ -40,8 +41,9 @@
               </v-btn>
             </v-col>
           </v-row>
-        </v-app-bar>
+          </v-app-bar>
         <object-prop :content="item" :deepness="0" :tittle="filesPaths[index]" :basecolor=" colors[index]"></object-prop>
+        </v-card>
       </v-col>
     </v-row>
     </v-container>
@@ -130,10 +132,5 @@ export default {
 </script>
 
 <style >
-
-  .v-card
-  {
-    border-radius: 2em !important;
-  }
 
 </style>
