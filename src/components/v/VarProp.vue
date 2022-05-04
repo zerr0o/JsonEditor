@@ -30,7 +30,7 @@
 
 export default {
   name: 'VarProp',
-  props: ["content", "deepness", "tittle", "basecolor", "arrayElem"],
+  props: ["content", "deepness", "tittle", "arrayElem"],
   data: () => {
     return {
       contentType: '',

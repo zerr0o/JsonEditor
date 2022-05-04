@@ -122,33 +122,6 @@ export default class ObjectOperation {
     }
 
 
-    /**
-     * return color
-     * @param deepness
-     * @returns {string}
-     */
-    getColor(deepness,inverse,base)
-    {
-        if(!base)
-            base = 0;
-
-        deepness = deepness+1;
-        let maxdeepness = 10;
-        //let color = Math.floor(Math.random*16777215).toString(16);
-        let color =200;
-        let r = 255-(color*(deepness/maxdeepness)*this.RandomWithSeed(base));
-        let g = 255-(color*1.6*(deepness/maxdeepness)*this.RandomWithSeed(-base));
-        let b = 255-(color*1.7*(deepness/maxdeepness)*this.RandomWithSeed(base));
-        if(inverse)
-        {
-            r = (255-r)<255/3 ? (255-r)*3 : 255-r;
-            g = (255-g)<255/3 ? (255-g)*3 : 255-g;
-            b = (255-b)<255/3 ? (255-b)*3 : 255-b;
-        }
-
-        return "rgba("+r+","+g+","+b+",0)";
-    }
-
 
     /**
      * return rndom base on a seed

@@ -1,56 +1,25 @@
 <template>
   <div style="margin : 0 0 0 2em">
-
-    <!--   if it is an object     -->
     <div v-for="(item,index) in content" :key="$ObjectOperation.makeId(5)+index.toString()" style="position: relative">
 
-      <div v-if="!$ObjectOperation.isAVar(item)" style="position: absolute; height: 100%; width: 100%; top:0 ; left: 0;"
+      <div v-if="!$ObjectOperation.isAVar(item,index)" style="position: absolute; height: 100%; width: 100%; top:0 ; left: 0;"
            :class="{'openedDiv' : isOpened[index] }" ></div>
 
-      <div @click="openElem(index)">
-<!--        :style="{'background-color': $ObjectOperation.isAnObject(item)? 'red' : $ObjectOperation.isAnArray(item) ? 'yellow' : 'yellowgreen' }"-->
-        <title-bar
-
-            @click="isOpened[index]=!isOpened[index]"
-            :title="'titlebar arrayprop de '+index"
-            :icon="getIconType(item)"
-            :actions="getAction(true , true ,true , content , { title : '' , value : item  } )"
-            :opened="isOpened[index]"
-            :content="$ObjectOperation.isAVar(item)? item : ''"
-            :arrayElem="true"
-            :set-parent="(x)=>{ x ? content = x : ''}"
-        ></title-bar>
-      </div>
-
-      <div v-if="isOpened[index]">
-        <!--   if it is an object     -->
-        <div v-if="$ObjectOperation.isAnObject(item)">
-          <object-prop v-if="isOpened[index]" :content="item" :tittle="index"
-                       :deepness="deepness+1" :basecolor="basecolor"
-                       :deleteInParent="(x)=>{deleteFromChild(x)}"
-          ></object-prop>
-        </div>
-        <!--   if it is an array     -->
-        <div v-else-if="$ObjectOperation.isAnArray(item)">
-          <array-prop v-if="isOpened[index]" :content="item" :tittle="index" :deepness="deepness+1"
-                      :basecolor="basecolor"></array-prop>
-        </div>
-
-      </div>
+      <title-bar
+          :title="index"
+          :content="item"
+          :array-elem="index"
+          :deepness="deepness+1"
+          :delete-item="(x)=>deleteThisItem(x)"
+      ></title-bar>
     </div>
   </div>
 </template>
 
 <script>
-// import Vue from "vue";
-
-
-import VarProp from "./VarProp";
-import ObjectProp from "./ObjectProp";
-
 export default {
   name: 'ArrayProp',
-  props: ["content", "deepness", "tittle", "basecolor"],
+  props: ["content", "deepness", "tittle"],
   data: () => {
     return {
       mainObject: [],
@@ -67,36 +36,13 @@ export default {
     makeID() {
       this.$ObjectOperation.makeId(5)
     },
-    test(value) {
-      console.log(value);
-    },
-    copyElem() {
-      this.$pastebin.type = this.$constants.ELEM_TYPE_ARRAY;
-      this.$pastebin.elemTitle = this.tittle;
-      this.$pastebin.elem = this.content;
-    },
-    pasteHere() {
-      this.content.push(this.$pastebin.elem);
-      console.log(this.content);
-      //this.$forceUpdate();
-    },
-    getAction(paste, copy, del , parent , elem) {
-      return this.$ObjectOperation.GetActions(paste, copy, del , parent , elem);
-    },
-    getIconType(elem) {
-      switch (true) {
-        case this.$ObjectOperation.isAnObject(elem):
-          return this.$constants.ELEM_TYPE_OBJ;
-        case this.$ObjectOperation.isAnArray(elem):
-          return this.$constants.ELEM_TYPE_ARRAY;
-        default:
-          return this.$constants.ELEM_TYPE_VAR;
-      }
-    },
-    openElem(index) {
-      this.isOpened[index] = !this.isOpened[index];
-      this.$forceUpdate();
+    deleteThisItem(item)
+    {
+      console.log("deleting index : " + item.index);
+      this.content.splice(item.index , 1);
+      this.$emit('reOpen');
     }
+
 
 
   }

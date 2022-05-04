@@ -42,7 +42,14 @@
             </v-col>
           </v-row>
           </v-app-bar>
-        <object-prop :content="item" :deepness="0" :tittle="filesPaths[index]" :basecolor=" colors[index]"></object-prop>
+<!--        <object-prop :content="item" :deepness="0" :tittle="filesPaths[index]" :basecolor=" colors[index]"></object-prop>-->
+          <title-bar
+              :title="filesPaths[index]"
+              :icon="'mdi-menu'"
+              :content="item"
+              :deepness="0"
+              :array-elem="-1"
+          ></title-bar>
         </v-card>
       </v-col>
     </v-row>
