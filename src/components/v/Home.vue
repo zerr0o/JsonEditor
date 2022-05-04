@@ -4,7 +4,7 @@
       <v-row>
         <v-col cols="8">
             <h4 style="padding-left: 2em; color: cornflowerblue; max-height: 40px">
-              In the pastebin : {{ $pastebin.elemTitle }}
+              In the pastebin : {{ $ObjectOperation.pastebin }}
             </h4>
         </v-col>
         <v-col cols="2">
@@ -123,7 +123,7 @@ export default {
     },
     clearPasteBin()
     {
-      Vue.prototype.$pastebin =  { type : null , elemTitle : null ,  elem : null };
+      this.$ObjectOperation.pastebin = null;
       this.$forceUpdate();
     }
 

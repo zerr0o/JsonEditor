@@ -169,24 +169,42 @@ export default class ObjectOperation {
      * @returns {[{enable: boolean, fAction: fAction},{enable: boolean, fAction: fAction},{enable: boolean, fAction: fAction}]}
      * @constructor
      */
-    GetActions( paste , copy , del )
+    GetActions( paste , copy , del , parent , elem )
     {
+
         return [
             {
+
                 fAction: () => {
-                    this.pasteHere()
+                    if( this.isAnArray(elem.value) )
+                    {
+                        elem.value.push( JSON.parse(JSON.stringify(this.pastebin.value)) );
+                        console.log("pushing " + elem.value);
+                        return elem.value;
+                    }
+                    else if( this.isAnObject(elem.value) )
+                    {
+                        console.log("putting " + elem.value);
+                        return this.pastebin;
+                    }else
+                    {
+                        console.error('cant paste in a variable');
+                    }
                 },
                 enable: paste
             },
             {
                 fAction: () => {
-                    this.copyElem()
+                    console.log(parent);
+                    console.log(elem);
+                    this.pastebin = elem;
                 },
                 enable: copy
             },
             {
                 fAction: () => {
-                    this.deleteElem()
+                    delete parent[elem];
+                    return parent
                 },
                 enable: del
             }

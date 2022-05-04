@@ -12,12 +12,13 @@
         <title-bar
 
             @click="isOpened[index]=!isOpened[index]"
-            :title="index"
+            :title="'titlebar arrayprop de '+index"
             :icon="getIconType(item)"
-            :actions="getAction(true , true ,true)"
+            :actions="getAction(true , true ,true , content , { title : '' , value : item  } )"
             :opened="isOpened[index]"
             :content="$ObjectOperation.isAVar(item)? item : ''"
             :arrayElem="true"
+            :set-parent="(x)=>{ x ? content = x : ''}"
         ></title-bar>
       </div>
 
@@ -79,8 +80,8 @@ export default {
       console.log(this.content);
       //this.$forceUpdate();
     },
-    getAction(paste, copy, del) {
-      return this.$ObjectOperation.GetActions(paste, copy, del);
+    getAction(paste, copy, del , parent , elem) {
+      return this.$ObjectOperation.GetActions(paste, copy, del , parent , elem);
     },
     getIconType(elem) {
       switch (true) {

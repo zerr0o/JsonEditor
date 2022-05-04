@@ -12,12 +12,13 @@
       <div @click="openElem(index)">
         <!--        :style="{'background-color': $ObjectOperation.isAnObject(item[1])? 'red' : $ObjectOperation.isAnArray(item[1]) ? 'yellow' : 'yellowgreen' }"-->
         <title-bar
-
-            :title="item[0]"
+            style="border: 10px solid red"
+            :title="'titlebar object de '+item[0]"
             :icon="getIconType(item[1])"
-            :actions="getAction(true , true ,true)"
+            :actions="getAction(true , true ,true , content ,  { title : item[0] , value : item[1] } )"
             :opened="isOpened[index]"
             :content="checkIsAVar(item[1])? item[1] : null"
+            :set-parent="(x)=>{ $ObjectOperation.isAnObject(item[1]) ? pasteHere(x,index) : ''}"
         ></title-bar>
       </div>
 
@@ -88,22 +89,14 @@ export default {
     checkIsAVar(elem) {
       return !this.$ObjectOperation.isAnArray(elem) && !this.$ObjectOperation.isAnObject(elem)
     },
-    copyElem() {
-      Vue.prototype.$pastebin.type = this.$constants.ELEM_TYPE_OBJ;
-      Vue.prototype.$pastebin.elemTitle = this.tittle;
-      Vue.prototype.$pastebin.elem = JSON.parse(JSON.stringify(this.content));
-      this.$forceUpdate();
-    },
-    pasteHere() {
-      if (!Vue.prototype.$pastebin.elemTitle)
+    pasteHere(elem , index) {
+      if (!elem)
         return;
-
-      let keyValue = Vue.prototype.$pastebin.elemTitle.toString();
-      while (this.content[keyValue])
+      let keyValue = elem.title ? elem.title.toString() : 'TAMERELATCHOIN';
+      while (this.content[this.mainObject[index][0]][keyValue])
         keyValue += '-copy';
-      this.content[keyValue] = JSON.parse(JSON.stringify(Vue.prototype.$pastebin.elem));
-
-      console.log(this.content);
+      console.log(JSON.stringify(elem));
+      this.content[this.mainObject[index][0]][keyValue] = JSON.parse(JSON.stringify(elem.value));
       this.init();
       this.$forceUpdate();
 
@@ -128,8 +121,8 @@ export default {
           return this.$constants.ELEM_TYPE_VAR;
       }
     },
-    getAction(paste, copy, del) {
-      return this.$ObjectOperation.GetActions(paste, copy, del);
+    getAction(paste, copy, del , parent , elem) {
+      return this.$ObjectOperation.GetActions(paste, copy, del , parent , elem);
     },
     openElem(index) {
       this.isOpened[index] = !this.isOpened[index];

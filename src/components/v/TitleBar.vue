@@ -15,20 +15,20 @@
       </v-col>
 
       <v-col cols="1" align="center" >
-        <v-btn icon v-if="actions[0].enable" elevation="0" color="green" :disabled="$pastebin.type === null"
-               @click="useAction(0)">
+        <v-btn icon v-if="actions[0].enable" elevation="0" color="green" :disabled="$ObjectOperation.pastebin === null"
+               @click.stop="useAction(0)">
           <v-icon >mdi-content-paste</v-icon>
         </v-btn>
       </v-col>
 
       <v-col cols="1" align="center">
-        <v-btn icon v-if="actions[1].enable" elevation="0" color="primary" @click="useAction(1)">
+        <v-btn icon v-if="actions[1].enable" elevation="0" color="primary" @click.stop="useAction(1)">
           <v-icon >mdi-content-copy</v-icon>
         </v-btn>
       </v-col>
 
       <v-col cols="1" align="center">
-        <v-btn icon v-if="actions[2].enable" @click="useAction(2)">
+        <v-btn icon v-if="actions[2].enable" @click.stop="useAction(2)">
           <v-icon  color="red">mdi-delete</v-icon>
         </v-btn>
       </v-col>
@@ -41,10 +41,10 @@
 <script>
 export default {
   name: "TitleBar",
-  props: ['title', 'icon', 'actions', "opened" , "content" , "arrayElem"],
+  props: ['title', 'icon', 'actions', "opened" , "content" , "arrayElem" , "setParent"],
   methods: {
     useAction(index) {
-      this.actions[index].fAction();
+        this.setParent(this.actions[index].fAction());
     },
     getIcon() {
 
