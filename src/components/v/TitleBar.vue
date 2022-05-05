@@ -1,11 +1,16 @@
 <template>
-  <div style="padding-left: 1em; " @mouseenter="hover=true" @mouseleave="hover=false" >
+  <div style="padding-left: 0.2em; " @mouseenter="hover=true" @mouseleave="hover=false">
 
     <div v-if="!$ObjectOperation.isAVar(content) && deepness !==0"
          style="position: absolute; height: 100%; width: 100%; top:0 ; left: 0;"
          :class="{'openedDiv' : isOpened }"></div>
 
-    <div @click.stop="isOpened = !isOpened">
+    <div @click.stop="isOpened = !isOpened"
+         :style="{'filter': searchOK === 3 ? 'grayscale(100%)' : searchOK === 1 ? 'saturate(100%)' : ''  }"
+         :class="{blink_me : searchOK === 2 }"
+         style="border-radius: 2em; padding-left: 1em"
+    >
+
 
       <v-row no-gutters dense style="margin: 0 !important;">
 
@@ -30,22 +35,26 @@
             <v-col offset="1" cols="2" align="center">
               <v-btn v-if="!$ObjectOperation.isAVar(content)" icon @click.stop="openOverlay()">
                 <v-icon color="green">mdi-plus</v-icon>
-                <element-adder :array="arrayElem"
-                               :return-function="(x,y,z)=>{addElement(x,y,z)}" @closeOverlay="closeOverlay()"
-                               v-if="adding"></element-adder>
+
               </v-btn>
             </v-col>
 
             <v-col cols="2">
               <v-btn v-if="arrayElem === -1 || $ObjectOperation.isAVar(content)" icon @click.stop="editing=true">
                 <v-icon sm color="blue">mdi-pencil</v-icon>
-
-                <element-adder :edit="{ key:title , value:content , type:getIconType() }"
-                               :array="arrayElem"
-                               :return-function="(x,y,z)=>{editElement(x,y,z)}" @closeOverlay="closeOverlay()"
-                               v-if="editing"></element-adder>
               </v-btn>
             </v-col>
+
+<!--            todo: z-index pété !-->
+            <element-adder :array="arrayElem"
+                           :return-function="(x,y,z)=>{addElement(x,y,z)}" @closeOverlay="closeOverlay()"
+                           v-if="adding"></element-adder>
+
+            <element-adder
+                :edit="{ key:title , value:content , type:getIconType() }"
+                :array="arrayElem"
+                :return-function="(x,y,z)=>{editElement(x,y,z)}" @closeOverlay="closeOverlay()"
+                v-if="editing"></element-adder>
 
             <v-col cols="2" align="center">
               <v-btn v-if="!$ObjectOperation.isAVar(content)" icon elevation="0" color="green"
@@ -68,26 +77,28 @@
             </v-col>
           </v-row>
         </v-col>
-        <v-col v-else cols="1" >
-               <v-icon @click.stop="copyElem()" right color="blue" >mdi-content-copy</v-icon>
+        <v-col v-else cols="1">
+          <v-icon @click.stop="copyElem()" right color="blue">mdi-content-copy</v-icon>
         </v-col>
       </v-row>
 
 
     </div>
 
-<!--    <v-scale-transition>-->
+    <!--    <v-scale-transition>-->
     <div v-if="isOpened">
       <!--   if it is an object     -->
       <div v-if="$ObjectOperation.isAnObject(content)">
-        <object-prop :paste-bin="pastebin" @reOpen="reOpen()" :content="content" :tittle="content" :deepness="deepness+1"></object-prop>
+        <object-prop :paste-bin="pastebin" @reOpen="reOpen()" :content="content" :tittle="content"
+                     :deepness="deepness+1" :search-value="searchValue"></object-prop>
       </div>
       <!--   if it is an array     -->
       <div v-else-if="$ObjectOperation.isAnArray(content)">
-        <array-prop :paste-bin="pastebin" @reOpen="reOpen()" :content="content" :tittle="content" :deepness="deepness+1"></array-prop>
+        <array-prop :paste-bin="pastebin" @reOpen="reOpen()" :content="content" :tittle="content" :deepness="deepness+1"
+                    :search-value="searchValue"></array-prop>
       </div>
     </div>
-<!--    </v-scale-transition>-->
+    <!--    </v-scale-transition>-->
 
   </div>
 </template>
@@ -98,18 +109,39 @@ import Vue from "vue";
 
 export default {
   name: "TitleBar",
-  props: ['title', "content", "arrayElem", 'deepness', "deleteItem", "parent" , "pastebin"],
+  props: ['title', "content", "arrayElem", 'deepness', "deleteItem", "parent", "pastebin", "searchValue"],
   data: () => {
     return {
       isOpened: false,
       adding: false,
       editing: false,
-      hover : false
+      hover: false,
+      search: null,
+      searchOK: 0
     }
   },
   created() {
     if (this.deepness === 0)
       this.isOpened = true;
+
+    this.search = this.searchValue;
+    if (this.searchValue && this.searchValue.searching) {
+      let titleInclude = this.title.toString().includes(this.searchValue.txt);
+      let contentInclude = JSON.stringify(this.content).includes(this.searchValue.txt);
+
+      if (contentInclude || titleInclude) {
+        this.searchOK = 1;
+        if (this.$ObjectOperation.isAVar(this.content) || (titleInclude && this.arrayElem === -1)) {
+          this.searchOK = 2;
+
+        }
+        if (!(this.arrayElem !== -1 && !contentInclude))
+          this.reOpen();
+      } else
+        this.searchOK = 3;
+    } else {
+      this.searchOK = 0;
+    }
 
     // if (this.pastebin)
     //   this.isOpened = true;
@@ -236,7 +268,7 @@ export default {
       let me = this;
       setTimeout(() => {
         me.isOpened = true;
-      }, 200)
+      }, 50)
     },
     addElement(key, value, type) {
 
@@ -253,12 +285,11 @@ export default {
           this.content[keyValue] = {};
         } else if (type === 1) {
           this.content[keyValue] = [];
-        }else
-        {
+        } else {
           this.content[keyValue] = value;
         }
         this.reOpen();
-      } else if (this.$ObjectOperation.isAnArray(this.content)){
+      } else if (this.$ObjectOperation.isAnArray(this.content)) {
         if (type === 0)
           this.content.push({});
         else if (type === 1)
@@ -268,7 +299,6 @@ export default {
       }
     },
     editElement(key, value, type) {
-
 
 
       // if (type === 0) {
@@ -291,44 +321,34 @@ export default {
       //
       // this.closeOverlay();
 
-      if( this.$ObjectOperation.isAnObject(this.parent) )
-      {
-        if( type === 0 || type === 1 )
-        {
+      if (this.$ObjectOperation.isAnObject(this.parent)) {
+        if (type === 0 || type === 1) {
           let temp = this.parent[this.title];
           console.log(temp);
           delete this.parent[this.title];
           this.parent[key] = temp
-        }
-        else
-        {
+        } else {
           delete this.parent[this.title];
           this.parent[key] = value;
-          this.content=value;
+          this.content = value;
           this.title = key;
         }
 
-      }
-      else if (this.$ObjectOperation.isAnArray(this.parent))
-      {
+      } else if (this.$ObjectOperation.isAnArray(this.parent)) {
         console.log(" key :  " + key + "  value : " + value + "  type = " + type);
         console.log(this.parent);
-        if( type === 2 )
-        {
+        if (type === 2) {
           this.parent[key] = value;
-          this.content=value;
+          this.content = value;
         }
-      }
-      else
-      {
-        this.content=value;
+      } else {
+        this.content = value;
       }
 
       this.title = key;
       this.closeOverlay();
 
     },
-
 
 
   }
@@ -349,6 +369,16 @@ export default {
   border-top: 3px solid lightblue;
   border-left: 3px solid lightblue;
   border-radius: 2em 0 0 2em;
+}
+
+.blink_me {
+  animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    background-color: rgb(198, 80, 80, 0.1);
+  }
 }
 
 </style>

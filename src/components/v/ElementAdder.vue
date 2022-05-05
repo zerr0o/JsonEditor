@@ -1,5 +1,5 @@
 <template>
-  <v-overlay>
+  <v-overlay >
     <v-card style="min-width: 50vw; border-radius: 2em; padding: 1em">
       <v-row>
         <v-col cols="10">

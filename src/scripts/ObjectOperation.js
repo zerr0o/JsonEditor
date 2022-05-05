@@ -7,7 +7,7 @@ export default class ObjectOperation {
     }
 
     pastebin = null;
-
+    searching = false;
     /**
      * Browse through object
      * @param obj

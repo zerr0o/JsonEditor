@@ -3,10 +3,21 @@
       style="background-repeat: repeat; background-image: url('https://jukeboxvr.fr/dist/assets/gif/ultra-light-hp-52d79828b249afbf40354aaf5fa9a19d.gif')">
     <v-app-bar dark app>
       <v-row>
-        <v-col cols="8" align-self="center">
+        <v-col cols="4" align-self="center">
           <h2>
             INSANELY COOL JSON EDITOR
           </h2>
+        </v-col>
+
+        <v-col cols="3">
+          <v-row justify="center" align="center">
+            <v-col cols="1" align-self="center">
+              <v-icon>mdi-magnify</v-icon>
+            </v-col>
+            <v-col cols="11" align-self="center">
+              <v-text-field v-model="search" clearable></v-text-field>
+            </v-col>
+          </v-row>
         </v-col>
         <v-col cols="2">
           <v-btn color="primary" block @click="clearPasteBin()">
@@ -49,24 +60,27 @@
                 </v-col>
               </v-row>
             </v-app-bar>
-            <title-bar
-                :title="filesPaths[index]"
-                :icon="'mdi-menu'"
-                :content="item"
-                :deepness="0"
-                :array-elem="-1"
+            <title-bar v-if="searchModify"
+                       :title="filesPaths[index]"
+                       :icon="'mdi-menu'"
+                       :content="item"
+                       :deepness="0"
+                       :array-elem="-1"
+                       :search-value="searchObj"
             ></title-bar>
           </v-card>
         </v-col>
       </v-row>
       <v-scroll-y-transition>
-        <v-card elevation="20" v-if="pastebinOpen && $ObjectOperation.pastebin" class="pastebin" style="border-radius: 2em; border: 1px solid rgba(0,0,0,0.2);" >
+        <v-card elevation="20" v-if="pastebinOpen && $ObjectOperation.pastebin" class="pastebin"
+                style="border-radius: 2em; border: 1px solid rgba(0,0,0,0.2);">
           <title-bar
               :title="$ObjectOperation.pastebin.title"
               :content="$ObjectOperation.pastebin.value"
               :deepness="0"
               :array-elem="-1"
               :pastebin="true"
+
           ></title-bar>
         </v-card>
       </v-scroll-y-transition>
@@ -96,7 +110,13 @@ export default {
       jsons: [],
       filesPaths: [],
       colors: [],
-      pastebinOpen: false
+      pastebinOpen: false,
+      search: null,
+      searchModify: true,
+      searchObj:{
+        txt:null,
+        searching:false
+      }
     }
   },
   methods: {
@@ -154,7 +174,6 @@ export default {
     clearPasteBin() {
       this.$ObjectOperation.pastebin = null;
       this.$forceUpdate();
-      console.log(this.jsons[0]);
     },
     saveJson(index) {
       this.$fileSystem.write(JSON.stringify(this.jsons[index]), "test.json", () => {
@@ -165,6 +184,19 @@ export default {
           })
     }
 
+  },
+  watch: {
+    search(value) {
+
+        this.searchModify = false;
+        setTimeout(() => {
+          this.searchObj={
+            txt:value,
+            searching:!!value
+          }
+          this.searchModify = true;
+        }, 100)
+      }
   }
 }
 </script>

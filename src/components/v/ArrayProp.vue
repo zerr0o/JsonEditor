@@ -1,9 +1,7 @@
 <template>
-  <div style="margin : 0 0 0 2em">
+  <div style="margin : 0 0 0 2em" >
+<!--    :style="{'background-color': search ? 'red' : 'yellow'}"-->
     <div v-for="(item,index) in content" :key="$ObjectOperation.makeId(5)+index.toString()" style="position: relative">
-
-      <div v-if="!$ObjectOperation.isAVar(item,index)" style="position: absolute; height: 100%; width: 100%; top:0 ; left: 0;"
-           :class="{'openedDiv' : isOpened[index] }" ></div>
 
       <title-bar
           :title="index"
@@ -13,6 +11,7 @@
           :delete-item="(x)=>deleteThisItem(x)"
           :parent="content"
           :pastebin="pasteBin"
+          :search-value="search"
       ></title-bar>
     </div>
   </div>
@@ -21,17 +20,16 @@
 <script>
 export default {
   name: 'ArrayProp',
-  props: ["content", "deepness", "tittle" , "pasteBin"],
+  props: ["content", "deepness", "tittle" , "pasteBin" , "searchValue"],
   data: () => {
     return {
-      mainObject: [],
-      isOpened: []
+      search:null
     }
   },
   created() {
-    for (let i = 0; i < this.content.length; i++) {
-      this.isOpened.push(false);
-    }
+
+      this.search = this.searchValue;
+
   },
   methods: {
 
