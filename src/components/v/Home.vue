@@ -1,58 +1,80 @@
 <template>
-  <v-app>
-    <v-app-bar app >
+  <v-app
+      style="background-repeat: repeat; background-image: url('https://jukeboxvr.fr/dist/assets/gif/ultra-light-hp-52d79828b249afbf40354aaf5fa9a19d.gif')">
+    <v-app-bar dark app>
       <v-row>
-        <v-col cols="8">
-            <h4 style="padding-left: 2em; color: cornflowerblue; max-height: 40px">
-              In the pastebin : {{ $ObjectOperation.pastebin }}
-            </h4>
+        <v-col cols="8" align-self="center">
+          <h2>
+            INSANELY COOL JSON EDITOR
+          </h2>
         </v-col>
         <v-col cols="2">
-          <v-btn color="primary" block @click="clearPasteBin()">Clear pastebin <v-icon>mdi-close</v-icon></v-btn>
+          <v-btn color="primary" block @click="clearPasteBin()">
+            <v-icon>mdi-reload</v-icon>
+          </v-btn>
         </v-col>
         <v-col cols="2">
-          <v-btn color="primary" block @click="loadFile">switchjson</v-btn>
+          <v-btn color="primary" block @click="loadFile">
+            <v-icon>mdi-note-plus</v-icon>
+          </v-btn>
         </v-col>
       </v-row>
     </v-app-bar>
 
     <v-container>
-    <v-row >
-      <v-col v-for="(item , index) in jsons" :key="filesPaths[index]" :cols="12/filesPaths.length">
-        <v-card elevation="10" style="border-radius: 2em; margin-bottom: 1.2em">
-          <v-app-bar elevation="0" color="primary" style="overflow: hidden; margin-bottom: 1em">
-          <v-row>
-            <v-col cols="9" style="overflow: hidden" >
-              <h4 style=" padding-left: 2em; color: white; max-height: 40px ">
-                {{ filesPaths[index] }}
-              </h4>
-            </v-col>
-            <v-col cols="1" >
-              <v-btn  dark icon @click="changeColor(index)"><v-icon>mdi-reload</v-icon></v-btn>
-            </v-col>
-            <v-col cols="1" >
-              <v-btn icon color="success"  @click="saveJson(index)">
-                <v-icon>mdi-content-save</v-icon>
-              </v-btn>
-            </v-col>
-            <v-col cols="1">
-              <v-btn icon color="red"  @click="closeJson(index)">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-          </v-app-bar>
-<!--        <object-prop :content="item" :deepness="0" :tittle="filesPaths[index]" :basecolor=" colors[index]"></object-prop>-->
+      <v-row>
+        <v-col v-for="(item , index) in jsons" :key="filesPaths[index]" :cols="12/filesPaths.length">
+          <v-card elevation="10" style="border-radius: 2em; margin-bottom: 1.2em">
+            <v-app-bar dark elevation="0" color="primary" style="overflow: hidden; margin-bottom: 1em">
+              <v-row>
+                <v-col cols="9" style="overflow: hidden">
+                  <h4 style=" padding-left: 2em; color: white; max-height: 40px ">
+                    {{ filesPaths[index] }}
+                  </h4>
+                </v-col>
+                <v-col cols="1">
+                  <v-btn dark icon @click="changeColor(index)">
+                    <v-icon>mdi-reload</v-icon>
+                  </v-btn>
+                </v-col>
+                <v-col cols="1">
+                  <v-btn icon color="success" @click="saveJson(index)">
+                    <v-icon>mdi-content-save</v-icon>
+                  </v-btn>
+                </v-col>
+                <v-col cols="1">
+                  <v-btn icon color="red" @click="closeJson(index)">
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-app-bar>
+            <title-bar
+                :title="filesPaths[index]"
+                :icon="'mdi-menu'"
+                :content="item"
+                :deepness="0"
+                :array-elem="-1"
+            ></title-bar>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-scroll-y-transition>
+        <v-card elevation="20" v-if="pastebinOpen && $ObjectOperation.pastebin" class="pastebin" style="border-radius: 2em; border: 1px solid rgba(0,0,0,0.2);" >
           <title-bar
-              :title="filesPaths[index]"
-              :icon="'mdi-menu'"
-              :content="item"
+              :title="$ObjectOperation.pastebin.title"
+              :content="$ObjectOperation.pastebin.value"
               :deepness="0"
               :array-elem="-1"
+              :pastebin="true"
           ></title-bar>
         </v-card>
-      </v-col>
-    </v-row>
+      </v-scroll-y-transition>
+      <v-btn style="position:fixed; bottom: 0; right: 25vw; width: 50%; border-radius: 2em" color="primary"
+             @click="openPastebin()">
+        PASTEBIN
+        <v-icon right>{{ pastebinOpen ? 'mdi-arrow-down' : 'mdi-arrow-up' }}</v-icon>
+      </v-btn>
     </v-container>
 
   </v-app>
@@ -61,6 +83,7 @@
 <script>
 
 import Vue from "vue";
+
 const fs = require('fs');
 const electron = require('electron');
 const dialog = electron.remote.dialog;
@@ -72,11 +95,16 @@ export default {
     return {
       jsons: [],
       filesPaths: [],
-      colors:[]
+      colors: [],
+      pastebinOpen: false
     }
   },
   methods: {
 
+    openPastebin() {
+      this.pastebinOpen = !this.pastebinOpen;
+      this.$forceUpdate();
+    },
     loadFile() {
       let me = this;
       if (process.platform !== 'darwin') {
@@ -101,7 +129,7 @@ export default {
                     console.log(result);
                     me.filesPaths[i] = file.filePaths[i];
                     me.jsons[i] = result;
-                    me.colors[i]= Math.floor(Math.random() * 500);
+                    me.colors[i] = Math.floor(Math.random() * 500);
                     me.$forceUpdate();
                   },
                   (error) => {
@@ -119,25 +147,47 @@ export default {
       this.jsons.splice(index, 1);
       this.filesPaths.splice(index, 1);
     },
-    saveJson(index)
-    {
-      console.log("TODO : save the json")
-    },
-    changeColor(index)
-    {
-      this.colors[index]= Math.floor(Math.random() * 500);
+    changeColor(index) {
+      this.colors[index] = Math.floor(Math.random() * 500);
       this.$forceUpdate();
     },
-    clearPasteBin()
-    {
+    clearPasteBin() {
       this.$ObjectOperation.pastebin = null;
       this.$forceUpdate();
+      console.log(this.jsons[0]);
+    },
+    saveJson(index) {
+      this.$fileSystem.write(JSON.stringify(this.jsons[index]), "test.json", () => {
+
+          },
+          (error) => {
+            console.error(error);
+          })
     }
 
   }
 }
 </script>
 
-<style >
+<style>
+.v-card {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
 
+.v-card::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+.pastebin {
+  position: fixed;
+  bottom: 0;
+  right: 25vw;
+  width: 50%;
+  max-height: 50%;
+  min-height: 6em;
+  padding-top: 1em;
+  padding-bottom: 2em;
+  overflow: scroll
+}
 </style>

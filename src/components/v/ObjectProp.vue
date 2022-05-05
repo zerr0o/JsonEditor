@@ -11,6 +11,8 @@
             :deepness="deepness+1"
             :delete-item="(x)=>{deleteThisItem(x)}"
             :array-elem="-1"
+            :parent="content"
+            :pastebin="pasteBin"
         ></title-bar>
 <!--      :set-parent="(x)=>{ $ObjectOperation.isAnObject(item[1]) ? pasteHere(x,index) : ''}"-->
     </div>
@@ -25,7 +27,7 @@ import Vue from "vue";
 
 export default {
   name: 'ObjectProp',
-  props: ["content", "deepness", "tittle", "arrayElem", "deleteInParent", "updateInParent"],
+  props: ["content", "deepness", "tittle", "arrayElem", "deleteInParent", "updateInParent" , "pasteBin"],
   data: () => {
     return {
       mainObject: [],

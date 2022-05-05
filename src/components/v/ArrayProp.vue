@@ -11,6 +11,8 @@
           :array-elem="index"
           :deepness="deepness+1"
           :delete-item="(x)=>deleteThisItem(x)"
+          :parent="content"
+          :pastebin="pasteBin"
       ></title-bar>
     </div>
   </div>
@@ -19,7 +21,7 @@
 <script>
 export default {
   name: 'ArrayProp',
-  props: ["content", "deepness", "tittle"],
+  props: ["content", "deepness", "tittle" , "pasteBin"],
   data: () => {
     return {
       mainObject: [],

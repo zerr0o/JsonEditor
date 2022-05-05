@@ -1,5 +1,5 @@
 <template>
-  <div style="padding-left: 1em; ">
+  <div style="padding-left: 1em; " @mouseenter="hover=true" @mouseleave="hover=false" >
 
     <div v-if="!$ObjectOperation.isAVar(content) && deepness !==0"
          style="position: absolute; height: 100%; width: 100%; top:0 ; left: 0;"
@@ -10,59 +10,84 @@
       <v-row no-gutters dense style="margin: 0 !important;">
 
         <v-col align-self="center" cols="1">
-          <v-icon :color="getColor(content)">{{ getIcon() }}</v-icon>
+          <v-icon :color="!$ObjectOperation.isAVar(content) && arrayElem > -1 ?'primary' : getColor(content) ">
+            {{ getIcon() }}
+          </v-icon>
         </v-col>
-        <v-col align-self="center" :cols="$ObjectOperation.isAVar(content) ? 2 :8">
+        <v-col align-self="center" :cols="$ObjectOperation.isAVar(content) ? ( pastebin ? 4 :2) : (pastebin ?10 :8)">
           <h5 style="text-align: start; color: grey; padding-left: 1.5em"
               :style="{ 'background-color': arrayElem>= 0?'rgba(76,255,255,0.18)':'rgba(76,255,0,0.18)'}"
           >{{ title }}</h5>
         </v-col>
-        <v-col align-self="center" v-if="$ObjectOperation.isAVar(content)" cols="6">
+        <v-col align-self="center" v-if="$ObjectOperation.isAVar(content)" :cols="pastebin ? 6 :6">
           <h5 style=" text-align: center; overflow: hidden; background-color: rgba(255,0,0,0.18)">{{ content }}</h5>
         </v-col>
 
-        <v-col cols="3" >
+        <v-col cols="3" v-if="!pastebin">
           <v-row no-gutters>
-            <v-col cols="3" align="center">
+
+
+            <v-col offset="1" cols="2" align="center">
+              <v-btn v-if="!$ObjectOperation.isAVar(content)" icon @click.stop="openOverlay()">
+                <v-icon color="green">mdi-plus</v-icon>
+                <element-adder :array="arrayElem"
+                               :return-function="(x,y,z)=>{addElement(x,y,z)}" @closeOverlay="closeOverlay()"
+                               v-if="adding"></element-adder>
+              </v-btn>
+            </v-col>
+
+            <v-col cols="2">
+              <v-btn v-if="arrayElem === -1 || $ObjectOperation.isAVar(content)" icon @click.stop="editing=true">
+                <v-icon sm color="blue">mdi-pencil</v-icon>
+
+                <element-adder :edit="{ key:title , value:content , type:getIconType() }"
+                               :array="arrayElem"
+                               :return-function="(x,y,z)=>{editElement(x,y,z)}" @closeOverlay="closeOverlay()"
+                               v-if="editing"></element-adder>
+              </v-btn>
+            </v-col>
+
+            <v-col cols="2" align="center">
               <v-btn v-if="!$ObjectOperation.isAVar(content)" icon elevation="0" color="green"
                      @click.stop="pasteHere()">
                 <v-icon>mdi-content-paste</v-icon>
               </v-btn>
             </v-col>
 
-            <v-col cols="3" align="center">
+            <v-col cols="2" align="center">
               <v-btn icon elevation="0" color="primary" @click.stop="copyElem()">
                 <v-icon>mdi-content-copy</v-icon>
               </v-btn>
             </v-col>
 
-            <v-col cols="3" align="center">
+
+            <v-col cols="2" align="center">
               <v-btn v-if="deepness>0" icon @click.stop="askedDeleteElem()">
                 <v-icon color="red">mdi-delete</v-icon>
               </v-btn>
             </v-col>
-
-            <v-col cols="3" align="center">
-              <v-btn icon @click.stop="addElem()">
-                <v-icon color="green">mdi-plus</v-icon>
-              </v-btn>
-            </v-col>
           </v-row>
+        </v-col>
+        <v-col v-else cols="1" >
+               <v-icon @click.stop="copyElem()" right color="blue" >mdi-content-copy</v-icon>
         </v-col>
       </v-row>
 
+
     </div>
 
+<!--    <v-scale-transition>-->
     <div v-if="isOpened">
       <!--   if it is an object     -->
       <div v-if="$ObjectOperation.isAnObject(content)">
-        <object-prop @reOpen="reOpen()" :content="content" :tittle="content" :deepness="deepness+1"></object-prop>
+        <object-prop :paste-bin="pastebin" @reOpen="reOpen()" :content="content" :tittle="content" :deepness="deepness+1"></object-prop>
       </div>
       <!--   if it is an array     -->
       <div v-else-if="$ObjectOperation.isAnArray(content)">
-        <array-prop @reOpen="reOpen()" :content="content" :tittle="content" :deepness="deepness+1"></array-prop>
+        <array-prop :paste-bin="pastebin" @reOpen="reOpen()" :content="content" :tittle="content" :deepness="deepness+1"></array-prop>
       </div>
     </div>
+<!--    </v-scale-transition>-->
 
   </div>
 </template>
@@ -73,25 +98,39 @@ import Vue from "vue";
 
 export default {
   name: "TitleBar",
-  props: ['title', "content", "arrayElem", 'deepness', "deleteItem"],
+  props: ['title', "content", "arrayElem", 'deepness', "deleteItem", "parent" , "pastebin"],
   data: () => {
     return {
       isOpened: false,
+      adding: false,
+      editing: false,
+      hover : false
     }
   },
   created() {
     if (this.deepness === 0)
       this.isOpened = true;
+
+    // if (this.pastebin)
+    //   this.isOpened = true;
   },
   methods: {
+    closeOverlay() {
+      this.adding = false;
+      this.editing = false;
+    },
+    openOverlay() {
+      this.isOpened = true;
+      this.adding = true;
+    },
     getIcon() {
       if (this.isOpened) {
         switch (this.getIconType()) {
           case this.$constants.ELEM_TYPE_OBJ :
-            if (this.arrayElem >= 0)
-              return "mdi-arrow-down"
-            else
-              return "mdi-folder-open";
+            // if (this.arrayElem >= 0)
+            //   return "mdi-arrow-down"
+            // else
+            return "mdi-folder-open";
           case this.$constants.ELEM_TYPE_ARRAY :
             return "mdi-application-array-outline"
           case this.$constants.ELEM_TYPE_VAR :
@@ -103,10 +142,10 @@ export default {
       } else {
         switch (this.getIconType()) {
           case this.$constants.ELEM_TYPE_OBJ :
-            if (this.arrayElem >= 0)
-              return "mdi-arrow-right"
-            else
-              return "mdi-folder";
+            // if (this.arrayElem >= 0)
+            //   return "mdi-arrow-right"
+            // else
+            return "mdi-folder";
           case this.$constants.ELEM_TYPE_ARRAY :
             return "mdi-application-array"
           case this.$constants.ELEM_TYPE_VAR :
@@ -199,9 +238,97 @@ export default {
         me.isOpened = true;
       }, 200)
     },
-    addElem() {
+    addElement(key, value, type) {
 
-    }
+
+      if (this.$ObjectOperation.isAnObject(this.content) && !key)
+        return;
+
+      if (this.$ObjectOperation.isAnObject(this.content)) {
+        let keyValue = key;
+        while (this.content[keyValue])
+          keyValue += '-homo';
+
+        if (type === 0) {
+          this.content[keyValue] = {};
+        } else if (type === 1) {
+          this.content[keyValue] = [];
+        }else
+        {
+          this.content[keyValue] = value;
+        }
+        this.reOpen();
+      } else if (this.$ObjectOperation.isAnArray(this.content)){
+        if (type === 0)
+          this.content.push({});
+        else if (type === 1)
+          this.content.push([]);
+        else
+          this.content.push(value);
+      }
+    },
+    editElement(key, value, type) {
+
+
+
+      // if (type === 0) {
+      //   let temp = this.parent[this.title];
+      //   console.log(temp);
+      //   delete this.parent[this.title];
+      //   this.parent[key] = temp
+      // } else if (type === 1) {
+      //   this.parent[key] = value
+      // } else {
+      //   if( this.$ObjectOperation.isAnObject(this.parent) )
+      //   {
+      //     delete this.parent[this.title];
+      //     this.parent[key] = value;
+      //   }
+      //
+      //   this.content = value;
+      // }
+      // this.title = key;
+      //
+      // this.closeOverlay();
+
+      if( this.$ObjectOperation.isAnObject(this.parent) )
+      {
+        if( type === 0 || type === 1 )
+        {
+          let temp = this.parent[this.title];
+          console.log(temp);
+          delete this.parent[this.title];
+          this.parent[key] = temp
+        }
+        else
+        {
+          delete this.parent[this.title];
+          this.parent[key] = value;
+          this.content=value;
+          this.title = key;
+        }
+
+      }
+      else if (this.$ObjectOperation.isAnArray(this.parent))
+      {
+        console.log(" key :  " + key + "  value : " + value + "  type = " + type);
+        console.log(this.parent);
+        if( type === 2 )
+        {
+          this.parent[key] = value;
+          this.content=value;
+        }
+      }
+      else
+      {
+        this.content=value;
+      }
+
+      this.title = key;
+      this.closeOverlay();
+
+    },
+
 
 
   }
