@@ -1,6 +1,6 @@
 <template>
   <v-overlay >
-    <v-card style="min-width: 50vw; border-radius: 2em; padding: 1em">
+    <v-card style="min-width: 50vw;" class="rounded-xl pa-5">
       <v-row>
         <v-col cols="10">
           <v-card-title>{{ edit ? 'EDIT ELEMENT' : 'ADD ELEMENT' }}</v-card-title>
@@ -11,7 +11,6 @@
           </v-btn>
         </v-col>
       </v-row>
-
 
       <v-item-group>
         <v-container>
@@ -32,12 +31,12 @@
             <v-col cols="10">
               <v-row v-if="!edit || array === -1">
                 <v-col cols="1" align-self="center">
-                  <v-btn icon outlined @click="disabled = !disabled" :color="disabled ? 'red': 'green'" >
+                  <v-btn  v-if="edit" icon outlined @click="disabled = !disabled" :color="disabled ? 'red': 'green'" >
                     <v-icon >mdi-pencil</v-icon>
                   </v-btn>
                 </v-col>
                 <v-col cols="11">
-                  <v-text-field :disabled="edit && disabled" autofocus v-model="name" :label="elementType[activeElem]+' name'"></v-text-field>
+                  <v-text-field v-if="type !== $constants.ELEM_TYPE_ARRAY" :disabled="edit && disabled"  autofocus v-model="name" :label="elementType[activeElem]+' name'"></v-text-field>
                 </v-col>
               </v-row>
               <v-row v-if="activeElem===2">
@@ -61,7 +60,7 @@
 <script>
 export default {
   name: "ElementAdder",
-  props: ['returnFunction', 'close', 'array', 'edit'],
+  props: ['returnFunction', 'array', 'edit' , 'type'],
   data: () => {
     return {
       elementType: ['object', 'array', 'variable'],
@@ -77,17 +76,18 @@ export default {
       this.activeElem = this.edit.type === this.$constants.ELEM_TYPE_OBJ ? 0 : this.edit.type === this.$constants.ELEM_TYPE_ARRAY ? 1 : 2;
       this.name = this.edit.key
       this.filedValue = this.edit.value;
-      console.log("editing " + this.name + " with actual valu : " + this.filedValue);
     }
 
   },
   methods:
       {
         addElem() {
-          this.returnFunction(this.array && this.edit > -1 ? this.array : this.name, this.filedValue, this.activeElem);
+          this.returnFunction( this.array > -1 && this.edit ? this.array : this.name, this.filedValue, this.activeElem);
+          if( this.edit )
+            this.callClose();
         },
         callClose() {
-          this.$emit('closeOverlay');
+          this.$ObjectOperation.editing = null;
         }
       }
 

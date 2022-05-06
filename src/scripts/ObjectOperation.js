@@ -7,7 +7,8 @@ export default class ObjectOperation {
     }
 
     pastebin = null;
-    searching = false;
+    editing = null;
+
     /**
      * Browse through object
      * @param obj
@@ -19,52 +20,13 @@ export default class ObjectOperation {
         let currentObjet = [];
         for (let key in obj) {
             let value = obj[key];
-
-            // if( this.isAnObject(value) )
-            // {
-            //     this.iterateObj(value , child+1 , parent+"/"+ key);
-            // }
-            // if( this.isAnArray(value) )
-            // {
-            //     this.iterateTab(value , child+1 , parent+"/"+ key)
-            // }
-            // else
-            // {
-            //     //console.log( separator+" "+ parent +"/"+ key + ": " + value  );
-            // }
             currentObjet.push([key,value,child]);
         }
         return currentObjet;
     }
 
-    // /**
-    //  * Browse through array
-    //  * @param tab
-    //  * @param child
-    //  * @param parent
-    //  */
-    // iterateTab(tab,child,parent)
-    // {
-    //     let separator = this.createDebugSeparator(child);
-    //     for (let elem in tab) {
-    //
-    //         // if( this.isAnObject(tab[elem]) )
-    //         // {
-    //         //     this.iterateObj(tab[elem] , child , parent);
-    //         // }
-    //         // else if( this.isAnArray(tab[elem]))
-    //         // {
-    //         //     this.iterateTab(tab[elem] , child , parent)
-    //         // }else
-    //         // {
-    //         //    // console.log( separator+" "+ parent +"/" +tab[elem]);
-    //         // }
-    //     }
-    // }
-
      isAnObject(elem)
     {
-
         let isObj = typeof elem === 'object' &&
         !Array.isArray(elem) &&
         elem !== null;

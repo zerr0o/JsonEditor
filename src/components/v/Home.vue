@@ -1,6 +1,15 @@
 <template>
   <v-app
       style="background-repeat: repeat; background-image: url('https://jukeboxvr.fr/dist/assets/gif/ultra-light-hp-52d79828b249afbf40354aaf5fa9a19d.gif')">
+
+
+    <element-adder v-if="$ObjectOperation.editing"
+                   :edit="$ObjectOperation.editing.edit"
+                   :array="$ObjectOperation.editing.array"
+                   :return-function="$ObjectOperation.editing.returnFunction"
+                   :type="$ObjectOperation.editing.type"
+    ></element-adder>
+
     <v-app-bar dark app>
       <v-row>
         <v-col cols="4" align-self="center">
@@ -19,33 +28,44 @@
             </v-col>
           </v-row>
         </v-col>
-        <v-col cols="2">
-          <v-btn color="primary" block @click="clearPasteBin()">
-            <v-icon>mdi-reload</v-icon>
-          </v-btn>
+        <v-col cols="4">
+          <v-row>
+            <v-col cols="4">
+              <v-btn color="primary" block @click="clearPasteBin()">
+                <v-icon>mdi-reload</v-icon>
+              </v-btn>
+            </v-col>
+            <v-col cols="4">
+              <v-btn color="primary" block @click="loadFile">
+                <v-icon>mdi-folder-download</v-icon>
+              </v-btn>
+            </v-col>
+            <v-col cols="4">
+              <v-btn color="primary" block @click="createFile">
+                <v-icon>mdi-note-plus</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-col>
-        <v-col cols="2">
-          <v-btn color="primary" block @click="loadFile">
-            <v-icon>mdi-note-plus</v-icon>
-          </v-btn>
-        </v-col>
+
       </v-row>
     </v-app-bar>
 
     <v-container>
+
       <v-row>
-        <v-col v-for="(item , index) in jsons" :key="filesPaths[index]" :cols="12/filesPaths.length">
-          <v-card elevation="10" style="border-radius: 2em; margin-bottom: 1.2em">
-            <v-app-bar dark elevation="0" color="primary" style="overflow: hidden; margin-bottom: 1em">
+        <v-col v-for="(item , index) in jsons" :key="filesPaths[index]" :cols=" Math.max(6 , 12/filesPaths.length)">
+          <v-card elevation="10" class="rounded-xl">
+            <v-app-bar dark elevation="0" color="primary">
               <v-row>
                 <v-col cols="9" style="overflow: hidden">
-                  <h4 style=" padding-left: 2em; color: white; max-height: 40px ">
+                  <v-card-title>
                     {{ filesPaths[index] }}
-                  </h4>
+                  </v-card-title>
                 </v-col>
                 <v-col cols="1">
-                  <v-btn dark icon @click="changeColor(index)">
-                    <v-icon>mdi-reload</v-icon>
+                  <v-btn :color="magnify[index] ? 'green' : 'red'" dark icon @click="toggleSearh(index)">
+                    <v-icon>mdi-magnify</v-icon>
                   </v-btn>
                 </v-col>
                 <v-col cols="1">
@@ -60,31 +80,37 @@
                 </v-col>
               </v-row>
             </v-app-bar>
-            <title-bar v-if="searchModify"
-                       :title="filesPaths[index]"
-                       :icon="'mdi-menu'"
-                       :content="item"
-                       :deepness="0"
-                       :array-elem="-1"
-                       :search-value="searchObj"
-            ></title-bar>
+            <v-card-text>
+
+              <title-bar v-if="!magnify[index] || searchModify"
+                         :title="filesPaths[index]"
+                         :icon="'mdi-menu'"
+                         :content="item"
+                         :deepness="0"
+                         :array-elem="-1"
+                         :search-value=" magnify[index] ?  searchObj : null"/>
+            </v-card-text>
           </v-card>
         </v-col>
       </v-row>
-      <v-scroll-y-transition>
-        <v-card elevation="20" v-if="pastebinOpen && $ObjectOperation.pastebin" class="pastebin"
-                style="border-radius: 2em; border: 1px solid rgba(0,0,0,0.2);">
-          <title-bar
-              :title="$ObjectOperation.pastebin.title"
-              :content="$ObjectOperation.pastebin.value"
-              :deepness="0"
-              :array-elem="-1"
-              :pastebin="true"
 
-          ></title-bar>
+      <v-scroll-y-transition>
+        <v-card elevation="20" v-if="pastebinOpen && $ObjectOperation.pastebin" class="pastebin rounded-xl"
+        >
+          <v-card-text>
+            <title-bar
+                :title="$ObjectOperation.pastebin.title"
+                :content="$ObjectOperation.pastebin.value"
+                :deepness="0"
+                :array-elem="-1"
+                :pastebin="true"
+
+            />
+          </v-card-text>
         </v-card>
       </v-scroll-y-transition>
-      <v-btn style="position:fixed; bottom: 0; right: 25vw; width: 50%; border-radius: 2em" color="primary"
+      <v-btn :disabled="!$ObjectOperation.pastebin" style="position:fixed; bottom: 0; right: 25vw; width: 50%;"
+             class="rounded-xl" color="primary"
              @click="openPastebin()">
         PASTEBIN
         <v-icon right>{{ pastebinOpen ? 'mdi-arrow-down' : 'mdi-arrow-up' }}</v-icon>
@@ -109,13 +135,13 @@ export default {
     return {
       jsons: [],
       filesPaths: [],
-      colors: [],
+      magnify: [],
       pastebinOpen: false,
       search: null,
       searchModify: true,
-      searchObj:{
-        txt:null,
-        searching:false
+      searchObj: {
+        txt: null,
+        searching: false
       }
     }
   },
@@ -147,9 +173,9 @@ export default {
               me.$fileSystem.load(file.filePaths[i], (result) => {
                     console.log(file.filePaths[i] + " : ");
                     console.log(result);
-                    me.filesPaths[i] = file.filePaths[i];
-                    me.jsons[i] = result;
-                    me.colors[i] = Math.floor(Math.random() * 500);
+                    me.filesPaths.push(file.filePaths[i]);
+                    me.jsons.push(result);
+                    me.magnify.push(true);
                     me.$forceUpdate();
                   },
                   (error) => {
@@ -166,10 +192,7 @@ export default {
     closeJson(index) {
       this.jsons.splice(index, 1);
       this.filesPaths.splice(index, 1);
-    },
-    changeColor(index) {
-      this.colors[index] = Math.floor(Math.random() * 500);
-      this.$forceUpdate();
+      this.magnify.splice(index, 1);
     },
     clearPasteBin() {
       this.$ObjectOperation.pastebin = null;
@@ -182,21 +205,28 @@ export default {
           (error) => {
             console.error(error);
           })
+    },
+    createFile() {
+      this.jsons.push({});
+      this.filesPaths.push("new file");
+    },
+    toggleSearh(index) {
+      this.magnify[index] = !this.magnify[index];
     }
 
   },
   watch: {
     search(value) {
 
-        this.searchModify = false;
-        setTimeout(() => {
-          this.searchObj={
-            txt:value,
-            searching:!!value
-          }
-          this.searchModify = true;
-        }, 100)
-      }
+      this.searchModify = false;
+      setTimeout(() => {
+        this.searchObj = {
+          txt: value,
+          searching: !!value
+        }
+        this.searchModify = true;
+      }, 10)
+    }
   }
 }
 </script>

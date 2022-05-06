@@ -1,60 +1,69 @@
 <template>
-  <div style="padding-left: 0.2em; " @mouseenter="hover=true" @mouseleave="hover=false">
+  <div style="position: relative" >
 
-    <div v-if="!$ObjectOperation.isAVar(content) && deepness !==0"
-         style="position: absolute; height: 100%; width: 100%; top:0 ; left: 0;"
-         :class="{'openedDiv' : isOpened }"></div>
+    <div v-if="!$ObjectOperation.isAVar(content) && deepness > 0"
+         :class="{'opened-div' : isOpened }"
+         :style="{ 'padding-left' : deepness*0.7+'rem' }"
+    ></div>
 
     <div @click.stop="isOpened = !isOpened"
          :style="{'filter': searchOK === 3 ? 'grayscale(100%)' : searchOK === 1 ? 'saturate(100%)' : ''  }"
          :class="{blink_me : searchOK === 2 }"
-         style="border-radius: 2em; padding-left: 1em"
-    >
+         class="rounded-xl pl-3" >
 
+      <v-row no-gutters >
+        <v-col :cols="pastebin ? 11 :9" :style="{ 'padding-left' : deepness*0.7+'rem' }" align-self="center"
+        >
 
-      <v-row no-gutters dense style="margin: 0 !important;">
-
-        <v-col align-self="center" cols="1">
-          <v-icon :color="!$ObjectOperation.isAVar(content) && arrayElem > -1 ?'primary' : getColor(content) ">
-            {{ getIcon() }}
-          </v-icon>
+          <v-row no-gutters >
+            <v-col align-self="center" cols="1" >
+              <v-icon :color="!$ObjectOperation.isAVar(content) && arrayElem > -1 ?'primary' : getColor(content) ">
+                {{ getIcon() }}
+              </v-icon>
+            </v-col>
+            <v-col align-self="center" :cols="$ObjectOperation.isAVar(content) ? 3 : (pastebin ?11 :11)">
+              <h5 style="color: grey;"
+                  class="pl-3"
+                  :class="{ 'rounded-l-xl' : $ObjectOperation.isAVar(content) ,  'rounded-xl' : !$ObjectOperation.isAVar(content) }"
+                  :style="{ 'background-color': arrayElem>= 0?'rgba(76,255,255,0.18)':'rgba(76,255,0,0.18)'}"
+              >{{ title }}</h5>
+            </v-col>
+            <v-col align-self="center" v-if="$ObjectOperation.isAVar(content)" :cols="8">
+              <h5
+                  class="pl-3 rounded-r-xl"
+                  style=" text-align: center; overflow: hidden; background-color: rgba(255,0,0,0.18)">{{ content }}</h5>
+            </v-col>
+          </v-row>
         </v-col>
-        <v-col align-self="center" :cols="$ObjectOperation.isAVar(content) ? ( pastebin ? 4 :2) : (pastebin ?10 :8)">
-          <h5 style="text-align: start; color: grey; padding-left: 1.5em"
-              :style="{ 'background-color': arrayElem>= 0?'rgba(76,255,255,0.18)':'rgba(76,255,0,0.18)'}"
-          >{{ title }}</h5>
-        </v-col>
-        <v-col align-self="center" v-if="$ObjectOperation.isAVar(content)" :cols="pastebin ? 6 :6">
-          <h5 style=" text-align: center; overflow: hidden; background-color: rgba(255,0,0,0.18)">{{ content }}</h5>
-        </v-col>
-
         <v-col cols="3" v-if="!pastebin">
           <v-row no-gutters>
 
 
             <v-col offset="1" cols="2" align="center">
-              <v-btn v-if="!$ObjectOperation.isAVar(content)" icon @click.stop="openOverlay()">
+              <v-btn v-if="!$ObjectOperation.isAVar(content)" icon
+                     @click.stop="$ObjectOperation.editing={
+                          edit:false,
+                          array:arrayElem,
+                          type:getIconType(),
+                          returnFunction:(x,y,z)=>{addElement(x,y,z) }
+
+              }">
                 <v-icon color="green">mdi-plus</v-icon>
 
               </v-btn>
             </v-col>
 
             <v-col cols="2">
-              <v-btn v-if="arrayElem === -1 || $ObjectOperation.isAVar(content)" icon @click.stop="editing=true">
-                <v-icon sm color="blue">mdi-pencil</v-icon>
+              <v-btn v-if="arrayElem === -1 || $ObjectOperation.isAVar(content)" icon
+                     @click.stop="$ObjectOperation.editing={
+                          edit:{ key:title , value:content , type:getIconType() },
+                          array:arrayElem,
+                          type:getIconType(),
+                          returnFunction:(x,y,z)=>{editElement(x,y,z) }
+              }">
+                <v-icon sm color="blue">mdi-pencil-outline</v-icon>
               </v-btn>
             </v-col>
-
-<!--            todo: z-index pété !-->
-            <element-adder :array="arrayElem"
-                           :return-function="(x,y,z)=>{addElement(x,y,z)}" @closeOverlay="closeOverlay()"
-                           v-if="adding"></element-adder>
-
-            <element-adder
-                :edit="{ key:title , value:content , type:getIconType() }"
-                :array="arrayElem"
-                :return-function="(x,y,z)=>{editElement(x,y,z)}" @closeOverlay="closeOverlay()"
-                v-if="editing"></element-adder>
 
             <v-col cols="2" align="center">
               <v-btn v-if="!$ObjectOperation.isAVar(content)" icon elevation="0" color="green"
@@ -85,20 +94,20 @@
 
     </div>
 
-    <!--    <v-scale-transition>-->
-    <div v-if="isOpened">
-      <!--   if it is an object     -->
-      <div v-if="$ObjectOperation.isAnObject(content)">
-        <object-prop :paste-bin="pastebin" @reOpen="reOpen()" :content="content" :tittle="content"
-                     :deepness="deepness+1" :search-value="searchValue"></object-prop>
+    <v-expand-transition>
+      <div v-if="isOpened">
+        <component v-if="$ObjectOperation.isAnObject(content) || $ObjectOperation.isAnArray(content)"
+                   :is="$ObjectOperation.isAnObject(content) ?  'object-prop' : 'array-prop'"
+                   :paste-bin="pastebin"
+                   @reOpen="reOpen()"
+                   :content="content"
+                   :tittle="content"
+                   :deepness="deepness+1"
+                   :search-value="searchValue"
+        />
+
       </div>
-      <!--   if it is an array     -->
-      <div v-else-if="$ObjectOperation.isAnArray(content)">
-        <array-prop :paste-bin="pastebin" @reOpen="reOpen()" :content="content" :tittle="content" :deepness="deepness+1"
-                    :search-value="searchValue"></array-prop>
-      </div>
-    </div>
-    <!--    </v-scale-transition>-->
+    </v-expand-transition>
 
   </div>
 </template>
@@ -143,8 +152,6 @@ export default {
       this.searchOK = 0;
     }
 
-    // if (this.pastebin)
-    //   this.isOpened = true;
   },
   methods: {
     closeOverlay() {
@@ -159,9 +166,6 @@ export default {
       if (this.isOpened) {
         switch (this.getIconType()) {
           case this.$constants.ELEM_TYPE_OBJ :
-            // if (this.arrayElem >= 0)
-            //   return "mdi-arrow-down"
-            // else
             return "mdi-folder-open";
           case this.$constants.ELEM_TYPE_ARRAY :
             return "mdi-application-array-outline"
@@ -174,9 +178,6 @@ export default {
       } else {
         switch (this.getIconType()) {
           case this.$constants.ELEM_TYPE_OBJ :
-            // if (this.arrayElem >= 0)
-            //   return "mdi-arrow-right"
-            // else
             return "mdi-folder";
           case this.$constants.ELEM_TYPE_ARRAY :
             return "mdi-application-array"
@@ -268,7 +269,7 @@ export default {
       let me = this;
       setTimeout(() => {
         me.isOpened = true;
-      }, 50)
+      }, 100)
     },
     addElement(key, value, type) {
 
@@ -299,27 +300,6 @@ export default {
       }
     },
     editElement(key, value, type) {
-
-
-      // if (type === 0) {
-      //   let temp = this.parent[this.title];
-      //   console.log(temp);
-      //   delete this.parent[this.title];
-      //   this.parent[key] = temp
-      // } else if (type === 1) {
-      //   this.parent[key] = value
-      // } else {
-      //   if( this.$ObjectOperation.isAnObject(this.parent) )
-      //   {
-      //     delete this.parent[this.title];
-      //     this.parent[key] = value;
-      //   }
-      //
-      //   this.content = value;
-      // }
-      // this.title = key;
-      //
-      // this.closeOverlay();
 
       if (this.$ObjectOperation.isAnObject(this.parent)) {
         if (type === 0 || type === 1) {
@@ -355,16 +335,14 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 
-
-.openedDiv:before {
+.opened-div:before {
   content: "";
   position: absolute;
-  left: 0;
   top: 0;
   height: 100%;
-  width: 3%; /* or 100px */
+  width: 1%; /* or 100px */
   border-bottom: 3px solid lightblue;
   border-top: 3px solid lightblue;
   border-left: 3px solid lightblue;
@@ -372,13 +350,7 @@ export default {
 }
 
 .blink_me {
-  animation: blinker 2s linear infinite;
-}
-
-@keyframes blinker {
-  50% {
-    background-color: rgb(198, 80, 80, 0.1);
-  }
+  background-color: rgba(225, 188, 2, 0.2);
 }
 
 </style>

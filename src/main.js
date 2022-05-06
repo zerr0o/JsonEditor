@@ -25,10 +25,7 @@ Vue.use(VueRouter);
 Vue.prototype.$genericMethods = genericMethods;
 Vue.prototype.$constants = constants;
 Vue.prototype.$fileSystem = fileSystem;
-Vue.prototype.$ObjectOperation = new ObjectOperation();
-
-
-
+Vue.prototype.$ObjectOperation = Vue.observable(new ObjectOperation());
 
 import objectProp from './components/v/ObjectProp.vue';
 import arrayProp from './components/v/ArrayProp.vue';

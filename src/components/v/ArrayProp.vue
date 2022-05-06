@@ -1,34 +1,32 @@
 <template>
-  <div style="margin : 0 0 0 2em" >
-<!--    :style="{'background-color': search ? 'red' : 'yellow'}"-->
-    <div v-for="(item,index) in content" :key="$ObjectOperation.makeId(5)+index.toString()" style="position: relative">
-
-      <title-bar
-          :title="index"
-          :content="item"
-          :array-elem="index"
-          :deepness="deepness+1"
-          :delete-item="(x)=>deleteThisItem(x)"
-          :parent="content"
-          :pastebin="pasteBin"
-          :search-value="search"
-      ></title-bar>
-    </div>
+  <div>
+    <title-bar v-for="(item,index) in content" :key="$ObjectOperation.makeId(5)+index.toString()"
+               :title="index"
+               :content="item"
+               :array-elem="index"
+               :deepness="deepness"
+               :delete-item="(x)=>deleteThisItem(x)"
+               :parent="content"
+               :pastebin="pasteBin"
+               :search-value="search"
+    ></title-bar>
   </div>
 </template>
 
 <script>
+import propMixin from "@/components/v/mixin/PropMixin";
+
 export default {
   name: 'ArrayProp',
-  props: ["content", "deepness", "tittle" , "pasteBin" , "searchValue"],
+  mixins:[propMixin],
   data: () => {
     return {
-      search:null
+      search: null
     }
   },
   created() {
 
-      this.search = this.searchValue;
+    this.search = this.searchValue;
 
   },
   methods: {
@@ -36,13 +34,11 @@ export default {
     makeID() {
       this.$ObjectOperation.makeId(5)
     },
-    deleteThisItem(item)
-    {
+    deleteThisItem(item) {
       console.log("deleting index : " + item.index);
-      this.content.splice(item.index , 1);
+      this.content.splice(item.index, 1);
       this.$emit('reOpen');
     }
-
 
 
   }
