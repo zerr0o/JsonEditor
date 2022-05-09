@@ -11,7 +11,7 @@
          :class="{blink_me : searchOK === 2 }"
          class="rounded-xl pl-3" >
 
-      <v-row no-gutters >
+      <v-row no-gutters v-if=" !$ObjectOperation.showOnlySearch || (searchOK === 1 || searchOK === 2 || searchOK === 0)" >
         <v-col :cols="pastebin ? 11 :9" :style="{ 'padding-left' : deepness*0.7+'rem' }" align-self="center"
         >
 
@@ -38,8 +38,19 @@
         <v-col cols="3" v-if="!pastebin">
           <v-row no-gutters>
 
-
             <v-col offset="1" cols="2" align="center">
+              <v-btn v-if="arrayElem === -1 || $ObjectOperation.isAVar(content)" icon
+                     @click.stop="$ObjectOperation.editing={
+                          edit:{ key:title , value:content , type:getIconType() },
+                          array:arrayElem,
+                          type:getIconType(),
+                          returnFunction:(x,y,z)=>{editElement(x,y,z) }
+              }">
+                <v-icon sm color="blue">mdi-pencil-outline</v-icon>
+              </v-btn>
+            </v-col>
+
+            <v-col  cols="2" align="center">
               <v-btn v-if="!$ObjectOperation.isAVar(content)" icon
                      @click.stop="$ObjectOperation.editing={
                           edit:false,
@@ -53,27 +64,17 @@
               </v-btn>
             </v-col>
 
-            <v-col cols="2">
-              <v-btn v-if="arrayElem === -1 || $ObjectOperation.isAVar(content)" icon
-                     @click.stop="$ObjectOperation.editing={
-                          edit:{ key:title , value:content , type:getIconType() },
-                          array:arrayElem,
-                          type:getIconType(),
-                          returnFunction:(x,y,z)=>{editElement(x,y,z) }
-              }">
-                <v-icon sm color="blue">mdi-pencil-outline</v-icon>
-              </v-btn>
-            </v-col>
+
 
             <v-col cols="2" align="center">
-              <v-btn v-if="!$ObjectOperation.isAVar(content)" icon elevation="0" color="green"
+              <v-btn v-if="!$ObjectOperation.isAVar(content)" icon elevation="0" color="primary"
                      @click.stop="pasteHere()">
                 <v-icon>mdi-content-paste</v-icon>
               </v-btn>
             </v-col>
 
             <v-col cols="2" align="center">
-              <v-btn icon elevation="0" color="primary" @click.stop="copyElem()">
+              <v-btn icon elevation="0" color="green" @click.stop="copyElem()">
                 <v-icon>mdi-content-copy</v-icon>
               </v-btn>
             </v-col>
@@ -240,6 +241,13 @@ export default {
     },
     copyElem() {
       this.$ObjectOperation.pastebin = {title: this.title, value: this.content};
+      this.$genericMethods.addAlert(
+          {
+            text:"element copied to pastebin" ,
+            icon:"mdi-content-paste",
+            color:"primary",
+            type:"success"
+          })
     },
     pasteHere() {
       if (!this.$ObjectOperation.pastebin)
@@ -249,19 +257,41 @@ export default {
         let keyValue = this.$ObjectOperation.pastebin.title;
         while (this.content[keyValue])
           keyValue += '-copy';
-        console.log(JSON.stringify(this.$ObjectOperation.pastebin));
         this.content[keyValue] = JSON.parse(JSON.stringify(this.$ObjectOperation.pastebin.value));
+        this.$genericMethods.addAlert(
+            {
+              text:"element pasted" ,
+              icon:"mdi-content-paste",
+              color:"green",
+              type:"success"
+            })
         this.reOpen();
       } else if (this.$ObjectOperation.isAnArray(this.content)) {
         this.content.push(JSON.parse(JSON.stringify(this.$ObjectOperation.pastebin.value)));
+
+        this.$genericMethods.addAlert(
+            {
+              text:"element pasted" ,
+              icon:"mdi-content-paste",
+              color:"green",
+              type:"success"
+            })
+
         this.reOpen();
       } else {
-        console.log("canbt paste here");
+        console.error("can't paste here");
       }
 
     },
     askedDeleteElem() {
       this.deleteItem({title: this.title, value: this.content, index: this.arrayElem});
+      this.$genericMethods.addAlert(
+          {
+            text:"element deleted" ,
+            icon:"mdi-delete",
+            color:"error",
+            type:"error"
+          })
     },
     reOpen() {
       this.$forceUpdate();
@@ -304,7 +334,6 @@ export default {
       if (this.$ObjectOperation.isAnObject(this.parent)) {
         if (type === 0 || type === 1) {
           let temp = this.parent[this.title];
-          console.log(temp);
           delete this.parent[this.title];
           this.parent[key] = temp
         } else {
@@ -315,8 +344,6 @@ export default {
         }
 
       } else if (this.$ObjectOperation.isAnArray(this.parent)) {
-        console.log(" key :  " + key + "  value : " + value + "  type = " + type);
-        console.log(this.parent);
         if (type === 2) {
           this.parent[key] = value;
           this.content = value;

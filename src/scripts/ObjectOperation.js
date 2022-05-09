@@ -8,6 +8,7 @@ export default class ObjectOperation {
 
     pastebin = null;
     editing = null;
+    showOnlySearch = false;
 
     /**
      * Browse through object

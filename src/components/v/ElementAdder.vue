@@ -1,5 +1,5 @@
 <template>
-  <v-overlay >
+  <v-overlay>
     <v-card style="min-width: 50vw;" class="rounded-xl pa-5">
       <v-row>
         <v-col cols="10">
@@ -29,25 +29,57 @@
           </v-row>
           <v-row>
             <v-col cols="10">
-              <v-row v-if="!edit || array === -1">
+              <v-row v-if="array === -1">
                 <v-col cols="1" align-self="center">
-                  <v-btn  v-if="edit" icon outlined @click="disabled = !disabled" :color="disabled ? 'red': 'green'" >
-                    <v-icon >mdi-pencil</v-icon>
+                  <v-btn v-if="edit" icon outlined @click="disabled = !disabled" :color="disabled ? 'red': 'green'">
+                    <v-icon>mdi-pencil</v-icon>
                   </v-btn>
                 </v-col>
-                <v-col cols="11">
-                  <v-text-field v-if="type !== $constants.ELEM_TYPE_ARRAY" :disabled="edit && disabled"  autofocus v-model="name" :label="elementType[activeElem]+' name'"></v-text-field>
+                <v-col cols="9">
+                  <v-text-field :disabled="edit && disabled" autofocus v-model="name"
+                                :label="elementType[activeElem]+' name'"></v-text-field>
                 </v-col>
+                <v-col cols="1" align-self="center">
+                  <v-btn color="primary" icon @click="copyToClipBoard(name)">
+                    <v-icon>mdi-content-copy</v-icon>
+                  </v-btn>
+                </v-col>
+                <v-col cols="1" align-self="center">
+                  <v-btn color="primary" icon disabled>
+                    <v-icon>mdi-magnify</v-icon>
+                  </v-btn>
+                </v-col>
+
+
               </v-row>
               <v-row v-if="activeElem===2">
-                <v-col offset="1" cols="11">
+                <v-col offset="1" cols="9">
                   <v-text-field v-model="filedValue" label="variable value"></v-text-field>
+                </v-col>
+                <v-col cols="1" align-self="center">
+                      <v-btn color="primary" icon @click="copyToClipBoard(filedValue)">
+                        <v-icon>mdi-content-copy</v-icon>
+                      </v-btn>
+                  <template>
+                    <v-tooltip v-model="copied" close-delay="10">
+                      <v-card >
+                        <v-card-title>copied</v-card-title>
+                        <v-card-text>{{filedValue}}</v-card-text>
+                      </v-card>
+                    </v-tooltip>
+                  </template>
+
+                </v-col>
+                <v-col cols="1" align-self="center">
+                  <v-btn color="primary" icon disabled>
+                    <v-icon>mdi-magnify</v-icon>
+                  </v-btn>
                 </v-col>
               </v-row>
             </v-col>
             <v-col cols="2">
               <v-btn height="100%" block :disabled="activeElem===-1" color="primary" @click.stop="addElem()">
-                <v-icon>{{edit ? 'mdi-check-bold' : 'mdi-plus' }}</v-icon>
+                <v-icon>{{ edit ? 'mdi-check-bold' : 'mdi-plus' }}</v-icon>
               </v-btn>
             </v-col>
           </v-row>
@@ -60,7 +92,7 @@
 <script>
 export default {
   name: "ElementAdder",
-  props: ['returnFunction', 'array', 'edit' , 'type'],
+  props: ['returnFunction', 'array', 'edit', 'type'],
   data: () => {
     return {
       elementType: ['object', 'array', 'variable'],
@@ -68,7 +100,8 @@ export default {
       activeElem: 0,
       name: '',
       filedValue: null,
-      disabled:true
+      disabled: true,
+      copied: false
     }
   },
   created() {
@@ -82,12 +115,37 @@ export default {
   methods:
       {
         addElem() {
-          this.returnFunction( this.array > -1 && this.edit ? this.array : this.name, this.filedValue, this.activeElem);
-          if( this.edit )
+          this.returnFunction(this.array > -1 && this.edit ? this.array : this.name, this.filedValue, this.activeElem);
+          this.$genericMethods.addAlert(
+              {
+                text:this.edit ? "element edited" : "element added" ,
+                icon:"mdi-plus",
+                color:"green",
+                type:"success"
+
+              })
+          if (this.edit)
             this.callClose();
         },
         callClose() {
           this.$ObjectOperation.editing = null;
+        },
+        copyToClipBoard(text) {
+          let me = this;
+          navigator.clipboard.writeText(text).then(function () {
+            console.log('Async: Copying to clipboard was successful : ' + text);
+            me.$genericMethods.addAlert(
+                {
+                  text:"copied : " + text,
+                  icon:"mdi-content-copy",
+                  color:"primary",
+                  type:"success"
+
+                }
+            );
+          }, function (err) {
+            console.error('Async: Could not copy text: ', err);
+          });
         }
       }
 

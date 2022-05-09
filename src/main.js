@@ -16,13 +16,12 @@ import ObjectOperation from './scripts/ObjectOperation.js'
 //Generic JS constructor
 let constants = new Constants();
 let fileSystem = new FileSystem();
-let genericMethods = new GenericMethods();
 
 //Vue.config.productionTip = false;
 Vue.use(VueRouter);
 
 //Vue prototype
-Vue.prototype.$genericMethods = genericMethods;
+Vue.prototype.$genericMethods = Vue.observable(new GenericMethods());
 Vue.prototype.$constants = constants;
 Vue.prototype.$fileSystem = fileSystem;
 Vue.prototype.$ObjectOperation = Vue.observable(new ObjectOperation());

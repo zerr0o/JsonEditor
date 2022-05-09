@@ -18,13 +18,15 @@ export default class FileSystem extends EventEmitter {
      * @param cbSuccess success callback
      * @param cbError error callback
      */
-    write(data , file ,cbSuccess,cbError , isJson = true)
+    write(data , file ,cbSuccess,cbError , isJson = true )
     {
         let me = this;
         if(isJson)
             me.data = JSON.parse(data);
         let prodPath = "";
         if(!me.isDevelopment) prodPath = "\\resources\\";
+
+
 
         fs.access(process.cwd()+prodPath+"\\files\\", fs.constants.F_OK, (err) => {
             if(err)
@@ -35,6 +37,7 @@ export default class FileSystem extends EventEmitter {
                         isJson ? JSON.stringify(me.data, null, 2) : data,
                         (err) => {
                             console.log('%c FILE SAVED ', 'background: #222; color: #bada55');
+
                             if( cbSuccess)
                                 cbSuccess("done");
                             if( err && cbError )

@@ -11,43 +11,48 @@
     ></element-adder>
 
     <v-app-bar dark app>
-      <v-row>
+      <v-row no-gutters>
         <v-col cols="4" align-self="center">
           <h2>
             INSANELY COOL JSON EDITOR
           </h2>
         </v-col>
 
-        <v-col cols="3">
-          <v-row justify="center" align="center">
+        <v-col cols="4">
+          <v-row no-gutters>
             <v-col cols="1" align-self="center">
               <v-icon>mdi-magnify</v-icon>
             </v-col>
-            <v-col cols="11" align-self="center">
-              <v-text-field v-model="search" clearable></v-text-field>
+            <v-col cols="10" align-self="baseline">
+              <v-text-field class="pt-7" label="search" v-model="search" clearable></v-text-field>
+            </v-col>
+            <v-col cols="1" align-self="center">
+              <v-btn @click="pasteClipBoard()" icon>
+                <v-icon>mdi-content-paste</v-icon>
+              </v-btn>
             </v-col>
           </v-row>
         </v-col>
-        <v-col cols="4">
+        <v-col cols="3" offset="1" align-self="center">
           <v-row>
-            <v-col cols="4">
-              <v-btn color="primary" block @click="clearPasteBin()">
-                <v-icon>mdi-reload</v-icon>
+            <v-col cols="6">
+              <v-btn :color="$ObjectOperation.showOnlySearch ? 'red':'primary' " block @click="toggleOnlySearch()">
+                <v-icon left> {{ $ObjectOperation.showOnlySearch ? 'mdi-eye-off' : 'mdi-eye' }}</v-icon>
+                 {{  $ObjectOperation.showOnlySearch ? 'only search' : 'everything' }}
               </v-btn>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="3">
               <v-btn color="primary" block @click="loadFile">
                 <v-icon>mdi-folder-download</v-icon>
               </v-btn>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="3">
               <v-btn color="primary" block @click="createFile">
                 <v-icon>mdi-note-plus</v-icon>
               </v-btn>
             </v-col>
           </v-row>
         </v-col>
-
       </v-row>
     </v-app-bar>
 
@@ -117,6 +122,18 @@
       </v-btn>
     </v-container>
 
+
+    <div style="position: fixed; bottom: 0; width: 20%; right: 0" class="pr-3 pb-4">
+      <v-alert v-for="(alert , index )  in $genericMethods.alerts" :key="alert.text +''+index"
+               border="left"
+               :color="alert.color"
+               dense
+               prominent
+               :icon="alert.icon"
+               :type="alert.type"
+      >{{ alert.text }}</v-alert>
+    </div>
+
   </v-app>
 </template>
 
@@ -171,11 +188,20 @@ export default {
           } else {
             for (let i = 0; i < file.filePaths.length; i++) {
               me.$fileSystem.load(file.filePaths[i], (result) => {
-                    console.log(file.filePaths[i] + " : ");
-                    console.log(result);
+                    // console.log(file.filePaths[i] + " : ");
+                    // console.log(result);
                     me.filesPaths.push(file.filePaths[i]);
                     me.jsons.push(result);
                     me.magnify.push(true);
+
+                    this.$genericMethods.addAlert(
+                        {
+                          text:"JSON Loaded" ,
+                          icon:"mdi-plus",
+                          color:"green",
+                          type:"success"
+                        })
+
                     me.$forceUpdate();
                   },
                   (error) => {
@@ -193,25 +219,60 @@ export default {
       this.jsons.splice(index, 1);
       this.filesPaths.splice(index, 1);
       this.magnify.splice(index, 1);
+      this.$genericMethods.addAlert(
+          {
+            text:"JSON closed" ,
+            icon:"mdi-close",
+            color:"primary",
+            type:"success"
+          })
     },
-    clearPasteBin() {
-      this.$ObjectOperation.pastebin = null;
+    toggleOnlySearch() {
+      //this.$ObjectOperation.pastebin = null;
+      this.$ObjectOperation.showOnlySearch = !this.$ObjectOperation.showOnlySearch
       this.$forceUpdate();
     },
     saveJson(index) {
-      this.$fileSystem.write(JSON.stringify(this.jsons[index]), "test.json", () => {
+      const content = "File content to save";
+      const element = document.createElement("a");
+      const file = new Blob([JSON.stringify(this.jsons[index])], {type: "text/plain"});
+      element.href = URL.createObjectURL(file);
+      element.download = "myJson.json";
+      element.click();
 
-          },
-          (error) => {
-            console.error(error);
-          })
     },
     createFile() {
       this.jsons.push({});
       this.filesPaths.push("new file");
+      this.$genericMethods.addAlert(
+          {
+            text:"new json added",
+            icon:"mdi-plus",
+            color:"green",
+            type:"success"
+          })
     },
     toggleSearh(index) {
       this.magnify[index] = !this.magnify[index];
+      this.$forceUpdate();
+      this.$genericMethods.addAlert(
+          {
+            text:"toggle search : " + this.magnify[index],
+            icon:"mdi-magnify",
+            color:"primary",
+            type:"success"
+          })
+    },
+    pasteClipBoard() {
+      let me = this;
+      navigator.clipboard.readText().then(function (result) {
+        console.log('Async: reading to clipboard was successful : ' + result);
+        me.search = result;
+      }, function (err) {
+        console.error('Async: Could not copy text: ', err);
+      });
+
+
     }
 
   },

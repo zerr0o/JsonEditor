@@ -35,7 +35,6 @@ export default {
       this.$ObjectOperation.makeId(5)
     },
     deleteThisItem(item) {
-      console.log("deleting index : " + item.index);
       this.content.splice(item.index, 1);
       this.$emit('reOpen');
     }
