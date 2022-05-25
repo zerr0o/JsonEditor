@@ -42,6 +42,12 @@ and you can create an element whenever you want !
 </div>
 
 
+## NEW in V2.0
+```
+Now you can type your variables with string number or boolean
+```
+![alt text](https://i.imgur.com/OxAYNJV.png)
+
 
 # Enjoy !
 

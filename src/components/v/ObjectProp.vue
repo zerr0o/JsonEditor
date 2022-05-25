@@ -48,6 +48,10 @@ export default {
     deleteThisItem(item) {
       delete this.content[item.title]
       this.$emit('reOpen');
+      if( this.$ObjectOperation.isAnArray(this.parent) )
+      {
+        console.log("deleted item in an arrayprop");
+      }
     }
   }
 }

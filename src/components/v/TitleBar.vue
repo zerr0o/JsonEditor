@@ -1,6 +1,5 @@
 <template>
   <div style="position: relative" >
-
     <div v-if="!$ObjectOperation.isAVar(content) && deepness > 0"
          :class="{'opened-div' : isOpened }"
          :style="{ 'padding-left' : deepness*0.7+'rem' }"
@@ -42,7 +41,7 @@
               <v-btn v-if="arrayElem === -1 || $ObjectOperation.isAVar(content)" icon
                      @click.stop="$ObjectOperation.editing={
                           edit:{ key:title , value:content , type:getIconType() },
-                          array:arrayElem,
+                          array:$ObjectOperation.isAnArray(content) ,
                           type:getIconType(),
                           returnFunction:(x,y,z)=>{editElement(x,y,z) }
               }">
@@ -52,13 +51,7 @@
 
             <v-col  cols="2" align="center">
               <v-btn v-if="!$ObjectOperation.isAVar(content)" icon
-                     @click.stop="$ObjectOperation.editing={
-                          edit:false,
-                          array:arrayElem,
-                          type:getIconType(),
-                          returnFunction:(x,y,z)=>{addElement(x,y,z) }
-
-              }">
+                     @click.stop="addSomething()">
                 <v-icon color="green">mdi-plus</v-icon>
 
               </v-btn>
@@ -78,7 +71,6 @@
                 <v-icon>mdi-content-copy</v-icon>
               </v-btn>
             </v-col>
-
 
             <v-col cols="2" align="center">
               <v-btn v-if="deepness>0" icon @click.stop="askedDeleteElem()">
@@ -301,33 +293,90 @@ export default {
         me.isOpened = true;
       }, 100)
     },
+    addSomething()
+    {
+
+      if( this.$ObjectOperation.isAnArray(this.content) && this.content.length > 0 )
+      {
+        this.content.push( JSON.parse(JSON.stringify(this.content[0])));
+        this.reOpen();
+      }
+      else
+      {
+        this.$ObjectOperation.editing={
+          edit:false,
+          array:this.$ObjectOperation.isAnArray(this.content),
+          type:this.getIconType(),
+          returnFunction:(x,y,z)=>{this.addElement(x,y,z) }
+
+        }
+      }
+
+
+    },
     addElement(key, value, type) {
 
 
       if (this.$ObjectOperation.isAnObject(this.content) && !key)
         return;
 
-      if (this.$ObjectOperation.isAnObject(this.content)) {
-        let keyValue = key;
-        while (this.content[keyValue])
-          keyValue += '-homo';
 
-        if (type === 0) {
-          this.content[keyValue] = {};
-        } else if (type === 1) {
-          this.content[keyValue] = [];
-        } else {
-          this.content[keyValue] = value;
-        }
-        this.reOpen();
-      } else if (this.$ObjectOperation.isAnArray(this.content)) {
-        if (type === 0)
-          this.content.push({});
-        else if (type === 1)
-          this.content.push([]);
-        else
-          this.content.push(value);
+      if( this.$ObjectOperation.isAnArray(this.parent) )
+      {
+
+        this.parent.forEach( elem =>
+        {
+          if (this.$ObjectOperation.isAnObject(elem)) {
+            let keyValue = key;
+            while (elem[keyValue])
+              keyValue += '-homo';
+
+            if (type === 0) {
+              elem[keyValue] = {};
+            } else if (type === 1) {
+              elem[keyValue] = [];
+            } else {
+              elem[keyValue] = value;
+            }
+            this.reOpen();
+          } else if (this.$ObjectOperation.isAnArray(elem)) {
+
+            if (type === 0)
+              elem.push({});
+            else if (type === 1)
+              elem.push([]);
+            else
+              elem.push(value);
+          }
+        })
       }
+      else
+      {
+        if (this.$ObjectOperation.isAnObject(this.content)) {
+          let keyValue = key;
+          while (this.content[keyValue])
+            keyValue += '-homo';
+
+          if (type === 0) {
+            this.content[keyValue] = {};
+          } else if (type === 1) {
+            this.content[keyValue] = [];
+          } else {
+            this.content[keyValue] = value;
+          }
+          this.reOpen();
+        } else if (this.$ObjectOperation.isAnArray(this.content)) {
+
+          if (type === 0)
+            this.content.push({});
+          else if (type === 1)
+            this.content.push([]);
+          else
+            this.content.push(value);
+        }
+      }
+
+
     },
     editElement(key, value, type) {
 

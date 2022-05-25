@@ -37,6 +37,10 @@ export default {
     deleteThisItem(item) {
       this.content.splice(item.index, 1);
       this.$emit('reOpen');
+      if( this.$ObjectOperation.isAnArray(this.parent) )
+      {
+        console.log("deleted item in an arrayprop");
+      }
     }
 
 
