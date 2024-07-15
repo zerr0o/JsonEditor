@@ -1,3 +1,9 @@
+
+### _**This project was only a test and the code is pure trash, i will not maintain it.**_
+### _**You will find bugs, the code and architecture is not optimized at all !**_
+
+---
+
 # JSON EDITOR
 ![alt text](https://media-exp1.licdn.com/dms/image/C4E1BAQE0MXwqySufVg/company-background_10000/0/1643366964988?e=2147483647&v=beta&t=VlscJXvL5eht_3LymAiFWzsoPVkbwQXxbGyXXTivUNA)
 
@@ -51,5 +57,6 @@ Now you can type your variables with string number or boolean
 
 # Enjoy !
 
-### For any information contact Victor from [Studio Muybridge](https://studiomuybridge.com/contact).
+### For any information about this do not contact anyone, this project is trash. 
+### But for cool projects and proper code, contact [Studio Muybridge](https://studiomuybridge.com/contact)
 
